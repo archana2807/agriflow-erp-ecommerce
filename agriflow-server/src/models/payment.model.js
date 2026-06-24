@@ -1,0 +1,53 @@
+import mongoose from "mongoose";
+
+const paymentSchema = new mongoose.Schema(
+  {
+    tenantId: {
+      type: String,
+      required: true,
+      index: true,
+    },
+
+    invoiceId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Invoice",
+      required: true,
+    },
+
+    customerId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Customer",
+      required: true,
+    },
+
+    amountPaid: {
+      type: Number,
+      required: true,
+    },
+
+    paymentMethod: {
+      type: String,
+      enum: ["CASH", "CARD", "UPI", "BANK_TRANSFER"],
+      default: "CASH",
+    },
+
+    remainingAmount: {
+      type: Number,
+      default: 0,
+    },
+
+    status: {
+      type: String,
+      enum: ["PARTIAL", "FULL"],
+      default: "PARTIAL",
+    },
+
+    createdBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+    },
+  },
+  { timestamps: true }
+);
+
+export default mongoose.model("Payment", paymentSchema);
