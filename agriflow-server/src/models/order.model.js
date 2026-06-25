@@ -3,15 +3,26 @@ import mongoose from "mongoose";
 const orderSchema = new mongoose.Schema(
   {
     tenantId: {
-      type: String,          // ✅ FIXED
+      type: String,
       required: true,
       index: true,
+    },
+
+    orderNo: {
+      type: String,
+      unique: true,
+      sparse: true,
     },
 
     customerId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Customer",
       required: true,
+    },
+
+    addressId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Address",
     },
 
     items: [
@@ -23,6 +34,7 @@ const orderSchema = new mongoose.Schema(
         name: String,
         quantity: Number,
         price: Number,
+        gstPercent: Number,
       },
     ],
 
@@ -33,8 +45,34 @@ const orderSchema = new mongoose.Schema(
 
     status: {
       type: String,
-      enum: ["PENDING", "CONFIRMED", "COMPLETED", "CANCELLED"],
+      enum: [
+        "PENDING",
+        "CONFIRMED",
+        "PROCESSING",
+        "PACKED",
+        "SHIPPED",
+        "DELIVERED",
+        "CANCELLED",
+      ],
       default: "PENDING",
+    },
+
+    orderType: {
+      type: String,
+      enum: ["WALKIN", "ONLINE"],
+      default: "ONLINE",
+    },
+
+    paymentMethod: {
+      type: String,
+      enum: ["CASH", "CARD", "UPI", "BANK_TRANSFER", "NONE"],
+      default: "NONE",
+    },
+
+    paymentStatus: {
+      type: String,
+      enum: ["UNPAID", "PARTIAL", "PAID"],
+      default: "UNPAID",
     },
 
     createdBy: {
@@ -44,5 +82,9 @@ const orderSchema = new mongoose.Schema(
   },
   { timestamps: true }
 );
+
+orderSchema.index({ tenantId: 1, orderNo: 1 });
+orderSchema.index({ customerId: 1 });
+orderSchema.index({ status: 1 });
 
 export default mongoose.model("Order", orderSchema);

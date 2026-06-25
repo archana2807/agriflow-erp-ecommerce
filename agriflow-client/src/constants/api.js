@@ -1,0 +1,53 @@
+export const API_BASE = "/api";
+
+export const API = {
+  AUTH: {
+    LOGIN: "/api/auth/login",
+    REGISTER: "/api/auth/register",
+    ME: "/api/auth/me",
+    LOGOUT: "/api/auth/logout",
+    PROFILE: "/api/auth/profile",
+    UPDATE_PROFILE: "/api/auth/profile",
+    CHANGE_PASSWORD: "/api/auth/change-password",
+  },
+  CUSTOMER_AUTH: {
+    REGISTER: "/api/customer/register",
+    LOGIN: "/api/customer/login",
+    LOGOUT: "/api/customer/logout",
+    PROFILE: "/api/customer/profile",
+    UPDATE_PROFILE: "/api/customer/profile",
+    CHANGE_PASSWORD: "/api/customer/change-password",
+  },
+  DASHBOARD: "/api/dashboard",
+  USERS: "/api/users",
+  CUSTOMERS: "/api/customers",
+  PRODUCTS: "/api/products",
+  ORDERS: "/api/orders",
+  INVOICES: "/api/invoices",
+  PAYMENTS: "/api/payments",
+  RAZORPAY: {
+    CREATE: "/api/razorpay/create-order",
+    VERIFY: "/api/razorpay/verify",
+  },
+  SHOP: {
+    PRODUCTS: "/api/shop/products",
+    PRODUCT_SLUG: (slug) => `/api/shop/products/${slug}`,
+    CATEGORIES: "/api/shop/categories",
+    BRANDS: "/api/shop/brands",
+    SEARCH: "/api/shop/search",
+    FEATURED: "/api/shop/featured",
+    NEW: "/api/shop/new-arrivals",
+    BEST: "/api/shop/best-sellers",
+  },
+  CART: "/api/cart",
+  WISHLIST: "/api/wishlist",
+  ADDRESSES: "/api/addresses",
+  CHECKOUT: "/api/checkout",
+  MY_ORDERS: "/api/my-orders",
+  ADMIN: {
+    CATEGORIES: "/api/admin/categories",
+    BRANDS: "/api/admin/brands",
+    BANNERS: "/api/admin/banners",
+    COUPONS: "/api/admin/coupons",
+  },
+};

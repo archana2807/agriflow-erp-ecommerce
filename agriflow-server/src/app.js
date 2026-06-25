@@ -12,6 +12,21 @@ import productRouters from "./routes/product.routes.js";
 import razorpayRoutes from "./routes/razorpay.routes.js";
 import userRoutes from "./routes/user.routes.js";
 
+// Customer Shop Routes
+import customerAuthRoutes from "./routes/customerAuth.routes.js";
+import shopRoutes from "./routes/shop.routes.js";
+import cartRoutes from "./routes/cart.routes.js";
+import wishlistRoutes from "./routes/wishlist.routes.js";
+import addressRoutes from "./routes/address.routes.js";
+import checkoutRoutes from "./routes/checkout.routes.js";
+import customerOrderRoutes from "./routes/customerOrder.routes.js";
+
+// Admin Management Routes
+import categoryRoutes from "./routes/category.routes.js";
+import brandRoutes from "./routes/brand.routes.js";
+import bannerRoutes from "./routes/banner.routes.js";
+import couponRoutes from "./routes/coupon.routes.js";
+
 const app = express();
 
 // Middleware
@@ -37,5 +52,18 @@ app.use("/api/razorpay", razorpayRoutes);
 
 // Admin Routes
 app.use("/api/users", userRoutes);
+app.use("/api/admin/categories", categoryRoutes);
+app.use("/api/admin/brands", brandRoutes);
+app.use("/api/admin/banners", bannerRoutes);
+app.use("/api/admin/coupons", couponRoutes);
+
+// Customer Shop Routes
+app.use("/api/customer", customerAuthRoutes);
+app.use("/api/shop", shopRoutes);
+app.use("/api/cart", cartRoutes);
+app.use("/api/wishlist", wishlistRoutes);
+app.use("/api/addresses", addressRoutes);
+app.use("/api/checkout", checkoutRoutes);
+app.use("/api/my-orders", customerOrderRoutes);
 
 export default app;

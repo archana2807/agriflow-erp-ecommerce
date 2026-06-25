@@ -5,7 +5,7 @@ import Customer from "../models/customer.model.js";
  */
 export const createCustomer = async (req, res, next) => {
   try {
-    const { name, phone } = req.validatedBody;
+    const { name, phone, email, isWalkIn } = req.validatedBody;
 
     const existingCustomer = await Customer.findOne({
       phone,
@@ -19,12 +19,24 @@ export const createCustomer = async (req, res, next) => {
       });
     }
 
-    const customer = await Customer.create({
+    const customerData = {
       name,
       phone,
       tenantId: req.tenantId,
       createdBy: req.user.user,
-    });
+      isWalkIn: isWalkIn || false,
+    };
+
+    if (isWalkIn) {
+      const walkInEmail = email || `walkin-${phone}@placeholder.local`;
+      const walkInPassword = `Walk${phone.slice(-4)}!${Date.now().toString(36)}`;
+      customerData.email = walkInEmail;
+      customerData.password = walkInPassword;
+    } else if (email) {
+      customerData.email = email;
+    }
+
+    const customer = await Customer.create(customerData);
 
     res.status(201).json({
       message: "Customer created successfully",

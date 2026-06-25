@@ -10,8 +10,19 @@ const orderItemSchema = z.object({
 export const createOrderSchema = z.object({
   customerId: z.string().min(1, "Customer ID is required"),
   items: z.array(orderItemSchema).min(1, "At least one item is required"),
+  orderType: z.enum(["WALKIN", "ONLINE"]).optional().default("ONLINE"),
+  paymentMethod: z.enum(["CASH", "CARD", "UPI", "BANK_TRANSFER", "NONE"]).optional().default("NONE"),
+  paymentAmount: z.number().min(0).optional().default(0),
 });
 
 export const updateOrderStatusSchema = z.object({
-  status: z.enum(["PENDING", "CONFIRMED", "SHIPPED", "DELIVERED", "CANCELLED"]),
+  status: z.enum([
+    "PENDING",
+    "CONFIRMED",
+    "PROCESSING",
+    "PACKED",
+    "SHIPPED",
+    "DELIVERED",
+    "CANCELLED",
+  ]),
 });

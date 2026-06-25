@@ -1,82 +1,93 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { Toaster } from "sonner";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { Provider } from "react-redux";
-import { Toaster } from "react-hot-toast";
-import { store } from "./store/store";
-import MainLayout from "./components/layout/MainLayout";
-import { ProtectedRoute, RoleRoute, AdminRoute, GuestRoute } from "./components/auth/ProtectedRoute";
-import Login from "./pages/auth/Login";
-import Register from "./pages/auth/Register";
-import Dashboard from "./pages/dashboard/Dashboard";
-import Customers from "./pages/customers/Customers";
-import Products from "./pages/products/Products";
-import Orders from "./pages/orders/Orders";
-import Invoices from "./pages/invoices/Invoices";
-import Payments from "./pages/payments/Payments";
-import Landing from "./pages/Landing";
-import Contact from "./pages/Contact";
-import Shop from "./pages/shop/Shop";
-import Cart from "./pages/shop/Cart";
-import Checkout from "./pages/shop/Checkout";
-import OrderSuccess from "./pages/shop/OrderSuccess";
-import UserManagement from "./pages/admin/UserManagement";
-import "./index.css";
+import { AuthProvider } from "@/contexts/AuthContext";
+import { CustomerAuthProvider } from "@/contexts/CustomerAuthContext";
 
-const qc = new QueryClient({
-  defaultOptions: { queries: { retry: 1, refetchOnWindowFocus: false } },
+import AdminLayout from "@/components/layout/AdminLayout";
+import CustomerLayout from "@/components/layout/CustomerLayout";
+
+import AdminLogin from "@/pages/auth/AdminLogin";
+import CustomerLogin from "@/pages/auth/CustomerLogin";
+import CustomerRegister from "@/pages/auth/CustomerRegister";
+
+import Dashboard from "@/pages/admin/Dashboard";
+import AdminCustomers from "@/pages/admin/Customers";
+import AdminCategories from "@/pages/admin/Categories";
+import AdminBrands from "@/pages/admin/Brands";
+import AdminProducts from "@/pages/admin/Products";
+import AdminOrders from "@/pages/admin/Orders";
+import AdminInvoices from "@/pages/admin/Invoices";
+import AdminPayments from "@/pages/admin/Payments";
+import AdminCoupons from "@/pages/admin/Coupons";
+import AdminBanners from "@/pages/admin/Banners";
+import AdminReports from "@/pages/admin/Reports";
+import AdminSettings from "@/pages/admin/Settings";
+
+import Home from "@/pages/customer/Home";
+import Shop from "@/pages/customer/Shop";
+import ProductDetails from "@/pages/customer/ProductDetails";
+import Cart from "@/pages/customer/Cart";
+import Checkout from "@/pages/customer/Checkout";
+import MyOrders from "@/pages/customer/MyOrders";
+import Wishlist from "@/pages/customer/Wishlist";
+import Profile from "@/pages/customer/Profile";
+
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: 1,
+      refetchOnWindowFocus: false,
+      staleTime: 30000,
+    },
+  },
 });
 
-export default function App() {
+function App() {
   return (
-    <Provider store={store}>
-      <QueryClientProvider client={qc}>
-        <BrowserRouter>
-          <Toaster position="top-right" />
-          <Routes>
-            {/* Public Routes */}
-            <Route path="/" element={<Landing />} />
-            <Route path="/shop" element={<Shop />} />
-            <Route path="/products" element={<Shop />} />
-            <Route path="/cart" element={<Cart />} />
-            <Route path="/contact" element={<Contact />} />
+    <BrowserRouter>
+      <QueryClientProvider client={queryClient}>
+        <Toaster position="top-right" richColors />
+        <AuthProvider>
+          <CustomerAuthProvider>
+            <Routes>
+              <Route path="/admin/login" element={<AdminLogin />} />
+              <Route path="/customer/login" element={<CustomerLogin />} />
+              <Route path="/register" element={<CustomerRegister />} />
 
-            {/* Guest Only Routes */}
-            <Route path="/login" element={<GuestRoute><Login /></GuestRoute>} />
-            <Route path="/register" element={<GuestRoute><Register /></GuestRoute>} />
+              <Route element={<CustomerLayout />}>
+                <Route path="/" element={<Home />} />
+                <Route path="shop" element={<Shop />} />
+                <Route path="product/:slug" element={<ProductDetails />} />
+                <Route path="cart" element={<Cart />} />
+                <Route path="checkout" element={<Checkout />} />
+                <Route path="my-orders" element={<MyOrders />} />
+                <Route path="wishlist" element={<Wishlist />} />
+                <Route path="profile" element={<Profile />} />
+              </Route>
 
-            {/* Protected Routes - Any Role */}
-            <Route path="/checkout" element={<ProtectedRoute><Checkout /></ProtectedRoute>} />
-            <Route path="/order-success" element={<ProtectedRoute><OrderSuccess /></ProtectedRoute>} />
+              <Route path="/admin" element={<AdminLayout />}>
+                <Route path="dashboard" element={<Dashboard />} />
+                <Route path="customers" element={<AdminCustomers />} />
+                <Route path="categories" element={<AdminCategories />} />
+                <Route path="brands" element={<AdminBrands />} />
+                <Route path="products" element={<AdminProducts />} />
+                <Route path="orders" element={<AdminOrders />} />
+                <Route path="invoices" element={<AdminInvoices />} />
+                <Route path="payments" element={<AdminPayments />} />
+                <Route path="coupons" element={<AdminCoupons />} />
+                <Route path="banners" element={<AdminBanners />} />
+                <Route path="reports" element={<AdminReports />} />
+                <Route path="settings" element={<AdminSettings />} />
+              </Route>
 
-            {/* ERP Protected Routes - ADMIN, SALES, ACCOUNTANT */}
-            <Route element={<ProtectedRoute><RoleRoute roles={["ADMIN", "SALES", "ACCOUNTANT"]}><MainLayout /></RoleRoute></ProtectedRoute>}>
-              <Route path="/dashboard" element={<Dashboard />} />
-              <Route path="/customers" element={
-                <RoleRoute roles={["ADMIN", "SALES"]}><Customers /></RoleRoute>
-              } />
-              <Route path="/erp/products" element={
-                <RoleRoute roles={["ADMIN", "SALES", "ACCOUNTANT"]}><Products /></RoleRoute>
-              } />
-              <Route path="/orders" element={
-                <RoleRoute roles={["ADMIN", "SALES"]}><Orders /></RoleRoute>
-              } />
-              <Route path="/invoices" element={
-                <RoleRoute roles={["ADMIN", "ACCOUNTANT"]}><Invoices /></RoleRoute>
-              } />
-              <Route path="/payments" element={
-                <RoleRoute roles={["ADMIN", "ACCOUNTANT"]}><Payments /></RoleRoute>
-              } />
-
-              {/* Admin Only Routes */}
-              <Route path="/admin/users" element={
-                <AdminRoute><UserManagement /></AdminRoute>
-              } />
-            </Route>
-
-            <Route path="*" element={<Navigate to="/" replace />} />
-          </Routes>
-        </BrowserRouter>
+              <Route path="*" element={<Navigate to="/" replace />} />
+            </Routes>
+          </CustomerAuthProvider>
+        </AuthProvider>
       </QueryClientProvider>
-    </Provider>
+    </BrowserRouter>
   );
 }
+
+export default App;
