@@ -5,12 +5,14 @@ import {
   Pencil,
   Trash2,
   Loader2,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import {
   Dialog,
   DialogContent,
@@ -27,14 +29,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import {
-  Pagination,
-  PaginationContent,
-  PaginationItem,
-  PaginationLink,
-  PaginationNext,
-  PaginationPrevious,
-} from "@/components/ui/pagination";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useForm } from "react-hook-form";
@@ -117,35 +111,36 @@ export default function Categories() {
   };
 
   return (
-    <div className="erp-page">
-      <div className="erp-page-header">
+    <div className="space-y-6">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="erp-page-title">Categories</h1>
-          <p className="erp-page-subtitle">Manage product categories</p>
+          <h2 className="text-2xl font-bold tracking-tight text-slate-900">Categories</h2>
+          <p className="text-sm text-slate-500 mt-1">Manage product categories</p>
         </div>
-        <Button onClick={() => openDialog()}>
+        <Button onClick={() => openDialog()} className="bg-slate-900 hover:bg-slate-800 text-white shadow-sm rounded-lg">
           <Plus className="mr-2 h-4 w-4" />
           Add Category
         </Button>
       </div>
 
-      <Card>
-        <CardHeader>
-          <div className="flex items-center gap-4">
-            <div className="relative flex-1 max-w-sm">
-              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-              <Input
-                placeholder="Search categories..."
-                value={q}
-                onChange={(e) => { setQ(e.target.value); setCurPage(1); }}
-                className="pl-9"
-              />
-            </div>
+      <Card className="border-slate-200 shadow-sm">
+        <CardContent className="p-5">
+          <div className="relative flex-1 max-w-sm">
+            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+            <Input
+              placeholder="Search categories..."
+              value={q}
+              onChange={(e) => { setQ(e.target.value); setCurPage(1); }}
+              className="pl-9 border-slate-200 focus-visible:ring-slate-400/20"
+            />
           </div>
-        </CardHeader>
-        <CardContent>
+        </CardContent>
+      </Card>
+
+      <Card className="border-slate-200 shadow-sm">
+        <CardContent className="p-0">
           {isLoading ? (
-            <div className="space-y-3">
+            <div className="p-5 space-y-3">
               {Array.from({ length: 5 }).map((_, i) => (
                 <Skeleton key={i} className="h-12 w-full" />
               ))}
@@ -154,41 +149,40 @@ export default function Categories() {
             <>
               <Table>
                 <TableHeader>
-                  <TableRow>
-                    <TableHead>Name</TableHead>
-                    <TableHead>Slug</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead className="text-right"></TableHead>
+                  <TableRow className="border-slate-100 hover:bg-transparent">
+                    <TableHead className="font-semibold text-slate-600 pl-5">Name</TableHead>
+                    <TableHead className="font-semibold text-slate-600">Slug</TableHead>
+                    <TableHead className="font-semibold text-slate-600">Status</TableHead>
+                    <TableHead className="font-semibold text-slate-600 text-right pr-5">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {categories.length === 0 ? (
                     <TableRow>
-                      <TableCell colSpan={4} className="text-center py-8 text-muted-foreground">
+                      <TableCell colSpan={4} className="text-center py-12 text-slate-500">
                         No categories found
                       </TableCell>
                     </TableRow>
                   ) : (
                     categories.map((cat) => (
-                      <TableRow key={cat._id}>
-                        <TableCell className="font-medium">{cat.name}</TableCell>
-                        <TableCell>{cat.slug}</TableCell>
+                      <TableRow key={cat._id} className="border-slate-50 hover:bg-slate-50/50">
+                        <TableCell className="font-medium text-slate-900 text-sm pl-5">{cat.name}</TableCell>
+                        <TableCell className="text-slate-600 text-sm">{cat.slug}</TableCell>
                         <TableCell>
-                          <Badge variant={cat.isActive !== false ? "default" : "secondary"}>
+                          <Badge variant="outline" className={
+                            cat.isActive !== false
+                              ? "text-emerald-700 bg-emerald-50 border-emerald-200"
+                              : "text-slate-600 bg-slate-50 border-slate-200"
+                          }>
                             {cat.isActive !== false ? "Active" : "Inactive"}
                           </Badge>
                         </TableCell>
-                        <TableCell className="text-right">
-                          <div className="flex justify-end gap-1">
-                            <Button variant="ghost" size="icon" onClick={() => openDialog(cat)}>
+                        <TableCell className="text-right pr-5">
+                          <div className="flex items-center justify-end gap-1">
+                            <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-500 hover:text-slate-700 hover:bg-slate-100" onClick={() => openDialog(cat)}>
                               <Pencil className="h-4 w-4" />
                             </Button>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="text-red-600"
-                              onClick={() => setDelTarget(cat)}
-                            >
+                            <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-500 hover:text-red-600 hover:bg-red-50" onClick={() => setDelTarget(cat)}>
                               <Trash2 className="h-4 w-4" />
                             </Button>
                           </div>
@@ -200,33 +194,28 @@ export default function Categories() {
               </Table>
 
               {totalPages > 1 && (
-                <div className="mt-4 flex justify-center">
-                  <Pagination>
-                    <PaginationContent>
-                      <PaginationItem>
-                        <PaginationPrevious
-                          onClick={() => setCurPage((p) => Math.max(1, p - 1))}
-                          disabled={curPage === 1}
-                        />
-                      </PaginationItem>
-                      {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
-                        <PaginationItem key={p}>
-                          <PaginationLink
-                            onClick={() => setCurPage(p)}
-                            isActive={p === curPage}
-                          >
-                            {p}
-                          </PaginationLink>
-                        </PaginationItem>
-                      ))}
-                      <PaginationItem>
-                        <PaginationNext
-                          onClick={() => setCurPage((p) => Math.min(totalPages, p + 1))}
-                          disabled={curPage === totalPages}
-                        />
-                      </PaginationItem>
-                    </PaginationContent>
-                  </Pagination>
+                <div className="flex items-center justify-between p-5">
+                  <p className="text-sm text-slate-500">Page {curPage} of {totalPages}</p>
+                  <div className="flex items-center gap-1.5">
+                    <Button variant="outline" size="icon" className="h-8 w-8 border-slate-200" onClick={() => setCurPage((p) => Math.max(1, p - 1))} disabled={curPage === 1}>
+                      <ChevronLeft className="h-4 w-4" />
+                    </Button>
+                    {Array.from({ length: Math.min(5, totalPages) }).map((_, i) => {
+                      let pg;
+                      if (totalPages <= 5) pg = i + 1;
+                      else if (curPage <= 3) pg = i + 1;
+                      else if (curPage >= totalPages - 2) pg = totalPages - 4 + i;
+                      else pg = curPage - 2 + i;
+                      return (
+                        <Button key={pg} variant={curPage === pg ? "default" : "outline"} size="icon" className={`h-8 w-8 ${curPage === pg ? "bg-slate-900 text-white hover:bg-slate-800" : "border-slate-200 text-slate-600 hover:bg-slate-50"}`} onClick={() => setCurPage(pg)}>
+                          {pg}
+                        </Button>
+                      );
+                    })}
+                    <Button variant="outline" size="icon" className="h-8 w-8 border-slate-200" onClick={() => setCurPage((p) => Math.min(totalPages, p + 1))} disabled={curPage === totalPages}>
+                      <ChevronRight className="h-4 w-4" />
+                    </Button>
+                  </div>
                 </div>
               )}
             </>
@@ -235,42 +224,43 @@ export default function Categories() {
       </Card>
 
       <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>{editing ? "Edit Category" : "Add Category"}</DialogTitle>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto border-slate-200">
+          <DialogHeader className="pb-4 border-b border-slate-100">
+            <DialogTitle className="text-lg font-semibold text-slate-900">{editing ? "Edit Category" : "Add Category"}</DialogTitle>
             <DialogDescription>
               {editing ? "Update category details" : "Add a new category"}
             </DialogDescription>
           </DialogHeader>
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="name">Name <span className="text-destructive">*</span></Label>
-              <Input id="name" {...register("name")} placeholder="Enter category name" />
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 pt-2">
+            <div className="space-y-1.5">
+              <Label className="text-sm font-medium text-slate-700">Name <span className="text-destructive">*</span></Label>
+              <Input id="name" {...register("name")} placeholder="Enter category name" className="border-slate-200 focus-visible:ring-slate-400/20" />
               {errors.name && (
                 <p className="text-sm text-red-500">{errors.name.message}</p>
               )}
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="slug">Slug <span className="text-destructive">*</span></Label>
-              <Input id="slug" {...register("slug")} placeholder="Enter slug" />
+            <div className="space-y-1.5">
+              <Label className="text-sm font-medium text-slate-700">Slug <span className="text-destructive">*</span></Label>
+              <Input id="slug" {...register("slug")} placeholder="Enter slug" className="border-slate-200 focus-visible:ring-slate-400/20" />
               {errors.slug && (
                 <p className="text-sm text-red-500">{errors.slug.message}</p>
               )}
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="description">Description</Label>
+            <div className="space-y-1.5">
+              <Label className="text-sm font-medium text-slate-700">Description</Label>
               <Textarea
                 id="description"
                 {...register("description")}
                 placeholder="Enter description"
                 rows={3}
+                className="border-slate-200 focus-visible:ring-slate-400/20 min-h-[80px]"
               />
             </div>
-            <DialogFooter>
-              <Button type="button" variant="outline" onClick={() => setOpen(false)}>
+            <DialogFooter className="pt-2">
+              <Button type="button" variant="outline" onClick={() => setOpen(false)} className="border-slate-200">
                 Cancel
               </Button>
-              <Button type="submit" disabled={busy}>
+              <Button type="submit" disabled={busy} className="bg-slate-900 hover:bg-slate-800 text-white">
                 {busy && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 {editing ? "Update" : "Create"}
               </Button>
@@ -280,15 +270,13 @@ export default function Categories() {
       </Dialog>
 
       <Dialog open={!!delTarget} onOpenChange={() => setDelTarget(null)}>
-        <DialogContent>
+        <DialogContent className="max-w-md border-slate-200">
           <DialogHeader>
-            <DialogTitle>Delete Category</DialogTitle>
-            <DialogDescription>
-              Are you sure you want to delete {delTarget?.name}? This action cannot be undone.
-            </DialogDescription>
+            <DialogTitle className="text-lg font-semibold text-slate-900">Delete Category</DialogTitle>
           </DialogHeader>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setDelTarget(null)}>
+          <p className="text-sm text-slate-500">Are you sure you want to delete <strong className="text-slate-900">{delTarget?.name}</strong>? This action cannot be undone.</p>
+          <DialogFooter className="pt-4">
+            <Button variant="outline" onClick={() => setDelTarget(null)} className="border-slate-200">
               Cancel
             </Button>
             <Button variant="destructive" onClick={confirmDelete} disabled={busy}>

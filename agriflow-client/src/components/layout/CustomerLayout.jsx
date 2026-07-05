@@ -4,9 +4,19 @@ import CustomerNavbar from "@/components/layout/CustomerNavbar";
 import CustomerFooter from "@/components/layout/CustomerFooter";
 import CartDrawer from "@/components/common/CartDrawer";
 import MobileBottomNav from "@/components/common/MobileBottomNav";
+import { useCart, useRemoveFromCart } from "@/hooks/useQueries";
 
 export default function CustomerLayout() {
   const [cartOpen, setCartOpen] = useState(false);
+  const { data } = useCart();
+  const removeMutation = useRemoveFromCart();
+
+  const cartItems = data?.cart?.items || [];
+  const total = data?.cart?.grandTotal || 0;
+
+  const handleRemove = (productId) => {
+    removeMutation.mutate(productId);
+  };
 
   return (
     <div className="flex min-h-screen flex-col">
@@ -15,7 +25,13 @@ export default function CustomerLayout() {
         <Outlet />
       </main>
       <CustomerFooter />
-      <CartDrawer open={cartOpen} onClose={() => setCartOpen(false)} />
+      <CartDrawer
+        open={cartOpen}
+        onClose={() => setCartOpen(false)}
+        cartItems={cartItems}
+        total={total}
+        onRemove={handleRemove}
+      />
       <MobileBottomNav />
     </div>
   );

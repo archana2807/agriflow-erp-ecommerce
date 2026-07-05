@@ -3,7 +3,8 @@ import mongoose from "mongoose";
 const addressSchema = new mongoose.Schema(
   {
     tenantId: {
-      type: String,
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Tenant",
       required: true,
       index: true,
     },

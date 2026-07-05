@@ -31,7 +31,7 @@ export default function Wishlist() {
     removeFromWishlist.mutate(productId, { onSuccess: () => toast.success("Removed from wishlist"), onError: () => toast.error("Failed") });
   };
   const handleAddToCart = (productId) => {
-    addToCart.mutate({ productId, qty: 1 }, { onSuccess: () => toast.success("Added to cart"), onError: () => toast.error("Failed") });
+    addToCart.mutate({ productId, quantity: 1 }, { onSuccess: () => toast.success("Added to cart"), onError: () => toast.error("Failed") });
   };
 
   return (
@@ -51,7 +51,7 @@ export default function Wishlist() {
         </div>
       </div>
 
-      <div style={{ paddingTop: "24px" }}>
+      <div className="pt-6">
         {loading ? (
           <WishlistSkeleton />
         ) : items.length === 0 ? (

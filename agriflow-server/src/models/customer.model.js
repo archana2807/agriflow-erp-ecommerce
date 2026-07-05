@@ -37,7 +37,8 @@ const customerSchema = new mongoose.Schema(
     },
 
     tenantId: {
-      type: String,
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Tenant",
       required: true,
       index: true,
     },
@@ -68,8 +69,8 @@ const customerSchema = new mongoose.Schema(
 customerSchema.index({ tenantId: 1, phone: 1 }, { unique: true });
 customerSchema.index({ tenantId: 1, email: 1 });
 
-customerSchema.pre("save", async function (next) {
-  if (!this.isModified("password")) return next();
+customerSchema.pre("save", async function () {
+  if (!this.isModified("password")) return;
   const salt = await bcrypt.genSalt(10);
   this.password = await bcrypt.hash(this.password, salt);
 });

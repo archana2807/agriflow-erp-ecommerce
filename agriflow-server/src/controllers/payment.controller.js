@@ -46,7 +46,7 @@ export const createPayment = async (req, res, next) => {
       paymentMethod: paymentMethod || "CASH",
       remainingAmount: remainingAmount < 0 ? 0 : remainingAmount,
       status,
-      createdBy: req.user.user,
+      createdBy: req.user.id,
     });
 
     // Update invoice status

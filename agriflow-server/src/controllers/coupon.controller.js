@@ -1,3 +1,4 @@
+import mongoose from "mongoose";
 import Coupon from "../models/coupon.model.js";
 
 /**
@@ -163,7 +164,7 @@ export const deleteCoupon = async (req, res, next) => {
 export const validateCoupon = async (req, res, next) => {
   try {
     const { code, orderAmount, tenantId } = req.body;
-    const resolvedTenantId = tenantId || req.tenantId || "default";
+    const resolvedTenantId = tenantId || req.tenantId || new mongoose.Types.ObjectId("6a2da032a1988ba7bb7e9820");
 
     const coupon = await Coupon.findOne({
       code: code.toUpperCase(),

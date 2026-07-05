@@ -41,9 +41,15 @@ export const getProducts = async (req, res, next) => {
       search,
     });
 
+    const totalPages = Math.ceil(result.total / result.limit);
+
     res.status(200).json({
       success: true,
-      ...result,
+      products: result.products,
+      totalPages,
+      totalCount: result.total,
+      page: result.page,
+      limit: result.limit,
     });
   } catch (error) {
     next(error);

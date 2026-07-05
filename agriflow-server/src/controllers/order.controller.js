@@ -12,7 +12,7 @@ export const createOrder = async (req, res, next) => {
       tenantId: req.tenantId,
       customerId,
       items,
-      createdBy: req.user.user,
+      createdBy: req.user.id,
       session: null,
     });
 
@@ -25,7 +25,7 @@ export const createOrder = async (req, res, next) => {
         order,
         orderItems,
         totalAmount,
-        createdBy: req.user.user,
+        createdBy: req.user.id,
         session: null,
       });
 
@@ -36,7 +36,7 @@ export const createOrder = async (req, res, next) => {
           invoice,
           amountPaid: paidAmount,
           paymentMethod: paymentMethod || "CASH",
-          createdBy: req.user.user,
+          createdBy: req.user.id,
           session: null,
         });
 
@@ -68,11 +68,26 @@ export const createOrder = async (req, res, next) => {
  */
 export const getOrders = async (req, res, next) => {
   try {
-    const orders = await Order.find({ tenantId: req.tenantId })
-      .populate("customerId", "name email phone")
-      .sort({ createdAt: -1 });
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const search = req.query.search || "";
+    const status = req.query.status || "";
 
-    res.json({ success: true, orders });
+    const query = { tenantId: req.tenantId };
+    if (status) query.status = status;
+
+    const skip = (page - 1) * limit;
+
+    const [orders, total] = await Promise.all([
+      Order.find(query)
+        .populate("customerId", "name email phone")
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(limit),
+      Order.countDocuments(query),
+    ]);
+
+    res.json({ success: true, orders, total, page, limit, totalPages: Math.ceil(total / limit), totalCount: total });
   } catch (error) {
     next(error);
   }

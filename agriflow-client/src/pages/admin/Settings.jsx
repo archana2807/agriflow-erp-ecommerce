@@ -67,21 +67,21 @@ export default function Settings() {
   };
 
   return (
-    <div className="erp-page max-w-2xl">
-      <div className="erp-page-header">
-        <h1 className="erp-page-title">Settings</h1>
-        <p className="erp-page-subtitle">Manage your account settings</p>
+    <div className="space-y-6 max-w-2xl">
+      <div>
+        <h2 className="text-2xl font-bold tracking-tight text-slate-900">Settings</h2>
+        <p className="text-sm text-slate-500 mt-1">Manage your account settings</p>
       </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
+      <Card className="border-slate-200 shadow-sm">
+        <CardHeader className="p-5 pb-4">
+          <CardTitle className="flex items-center gap-2 text-base font-semibold text-slate-900">
             <User className="h-5 w-5" />
             Profile
           </CardTitle>
           <CardDescription>Update your personal information</CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent className="pt-0">
           <Form {...profileForm}>
             <form onSubmit={profileForm.handleSubmit(handleProfileUpdate)} className="space-y-4">
               <FormField
@@ -91,7 +91,7 @@ export default function Settings() {
                   <FormItem>
                     <FormLabel required>Name</FormLabel>
                     <FormControl>
-                      <Input placeholder="Your name" autoComplete="name" {...field} />
+                      <Input placeholder="Your name" autoComplete="name" className="border-slate-200 focus-visible:ring-slate-400/20" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -104,13 +104,13 @@ export default function Settings() {
                   <FormItem>
                     <FormLabel required>Email</FormLabel>
                     <FormControl>
-                      <Input type="email" placeholder="Your email" autoComplete="email" {...field} />
+                      <Input type="email" placeholder="Your email" autoComplete="email" className="border-slate-200 focus-visible:ring-slate-400/20" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
-              <Button type="submit" disabled={profileForm.formState.isSubmitting}>
+              <Button type="submit" disabled={profileForm.formState.isSubmitting} className="bg-slate-900 hover:bg-slate-800 text-white">
                 {profileForm.formState.isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 Save Changes
               </Button>
@@ -119,15 +119,15 @@ export default function Settings() {
         </CardContent>
       </Card>
 
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
+      <Card className="border-slate-200 shadow-sm">
+        <CardHeader className="p-5 pb-4">
+          <CardTitle className="flex items-center gap-2 text-base font-semibold text-slate-900">
             <Lock className="h-5 w-5" />
             Change Password
           </CardTitle>
           <CardDescription>Update your password</CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent className="pt-0">
           <Form {...passwordForm}>
             <form onSubmit={passwordForm.handleSubmit(handlePasswordChange)} className="space-y-4">
               <FormField
@@ -137,7 +137,7 @@ export default function Settings() {
                   <FormItem>
                     <FormLabel required>Current Password</FormLabel>
                     <FormControl>
-                      <Input type="password" placeholder="Enter current password" autoComplete="current-password" {...field} />
+                      <Input type="password" placeholder="Enter current password" autoComplete="current-password" className="border-slate-200 focus-visible:ring-slate-400/20" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -150,7 +150,7 @@ export default function Settings() {
                   <FormItem>
                     <FormLabel required>New Password</FormLabel>
                     <FormControl>
-                      <Input type="password" placeholder="Enter new password" autoComplete="new-password" {...field} />
+                      <Input type="password" placeholder="Enter new password" autoComplete="new-password" className="border-slate-200 focus-visible:ring-slate-400/20" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -163,13 +163,13 @@ export default function Settings() {
                   <FormItem>
                     <FormLabel required>Confirm New Password</FormLabel>
                     <FormControl>
-                      <Input type="password" placeholder="Confirm new password" autoComplete="new-password" {...field} />
+                      <Input type="password" placeholder="Confirm new password" autoComplete="new-password" className="border-slate-200 focus-visible:ring-slate-400/20" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
-              <Button type="submit" disabled={passwordForm.formState.isSubmitting}>
+              <Button type="submit" disabled={passwordForm.formState.isSubmitting} className="bg-slate-900 hover:bg-slate-800 text-white">
                 {passwordForm.formState.isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 Change Password
               </Button>

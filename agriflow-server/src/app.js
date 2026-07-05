@@ -4,6 +4,8 @@ import cookieParser from "cookie-parser";
 import helmet from "helmet";
 import compression from "compression";
 import morgan from "morgan";
+import path from "path";
+import { fileURLToPath } from "url";
 import { errorHandler } from "./middlewares/error.middleware.js";
 import { tenantRateLimiterMiddleware } from "./middlewares/tenantRateLimiter.middleware.js";
 import authRoutes from "./routes/auth.routes.js";
@@ -30,8 +32,15 @@ import categoryRoutes from "./routes/category.routes.js";
 import brandRoutes from "./routes/brand.routes.js";
 import bannerRoutes from "./routes/banner.routes.js";
 import couponRoutes from "./routes/coupon.routes.js";
+import uploadRoutes from "./routes/upload.routes.js";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const app = express();
+
+// Static file serving for uploads
+app.use("/uploads", express.static(path.join(__dirname, "../public/uploads")));
 
 // Security & Performance Middleware
 app.use(helmet());
@@ -48,9 +57,6 @@ app.use(cookieParser());
 
 // Rate Limiting
 app.use("/api/", tenantRateLimiterMiddleware);
-
-// Error Handler (must be last)
-app.use(errorHandler);
 
 // Public Routes
 app.use("/api/auth", authRoutes);
@@ -70,6 +76,7 @@ app.use("/api/admin/categories", categoryRoutes);
 app.use("/api/admin/brands", brandRoutes);
 app.use("/api/admin/banners", bannerRoutes);
 app.use("/api/admin/coupons", couponRoutes);
+app.use("/api/upload", uploadRoutes);
 
 // Customer Shop Routes
 app.use("/api/customer", customerAuthRoutes);
@@ -79,5 +86,8 @@ app.use("/api/wishlist", wishlistRoutes);
 app.use("/api/addresses", addressRoutes);
 app.use("/api/checkout", checkoutRoutes);
 app.use("/api/my-orders", customerOrderRoutes);
+
+// Error Handler (must be last)
+app.use(errorHandler);
 
 export default app;

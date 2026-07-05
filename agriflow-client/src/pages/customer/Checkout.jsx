@@ -4,30 +4,19 @@ import {
   MapPin,
   CreditCard,
   ClipboardCheck,
-  CheckCircle,
   Plus,
-  Banknote,
-  Building2,
   Smartphone,
-  ArrowLeft,
   Pencil,
   Trash2,
+  X,
+  ShieldCheck,
+  ShoppingBag,
+  Lock,
+  AlertCircle,
+  BadgeCheck,
+  Banknote,
+  CircleDollarSign,
 } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
-import { Skeleton } from "@/components/ui/skeleton";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-} from "@/components/ui/dialog";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { toast } from "sonner";
 import { formatCurrency } from "@/lib/utils";
 import {
@@ -41,15 +30,50 @@ import {
 
 function CheckoutSkeleton() {
   return (
-    <div className="max-w-5xl mx-auto px-4 py-8 space-y-6">
-      <Skeleton className="h-8 w-48" />
-      <div className="grid lg:grid-cols-3 gap-8">
-        <div className="lg:col-span-2 space-y-4">
-          {Array.from({ length: 3 }).map((_, i) => (
-            <Skeleton key={i} className="h-24 w-full rounded-lg" />
-          ))}
+    <div className="shop-page">
+      <div className="page-hero page-hero-green">
+        <div className="page-hero-inner">
+          <div className="page-hero-content">
+            <ClipboardCheck className="h-6 w-6" />
+            <div>
+              <div style={{ width: 140, height: 20, background: "rgba(255,255,255,0.3)", borderRadius: 4 }} />
+              <div style={{ width: 100, height: 12, background: "rgba(255,255,255,0.2)", borderRadius: 4, marginTop: 6 }} />
+            </div>
+          </div>
         </div>
-        <Skeleton className="h-64 rounded-lg" />
+      </div>
+      <div className="checkout-layout">
+        <div className="checkout-card">
+          <div style={{ padding: 24 }}>
+            {[1, 2, 3].map((_, i) => (
+              <div key={i} style={{ marginBottom: i < 2 ? 24 : 0 }}>
+                <div style={{ width: 140, height: 16, background: "#f1f5f9", borderRadius: 4, marginBottom: 14 }} />
+                {[1, 2].map((_, j) => (
+                  <div key={j} style={{ display: "flex", gap: 14, padding: "12px 0", borderBottom: j < 1 ? "1px solid #f1f5f9" : "none" }}>
+                    <div style={{ width: 20, height: 20, borderRadius: "50%", background: "#f1f5f9" }} />
+                    <div style={{ flex: 1 }}>
+                      <div style={{ width: "40%", height: 12, background: "#f1f5f9", borderRadius: 4, marginBottom: 8 }} />
+                      <div style={{ width: "70%", height: 10, background: "#f1f5f9", borderRadius: 4 }} />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ))}
+          </div>
+        </div>
+        <div className="checkout-summary">
+          <div style={{ padding: "18px 24px", borderBottom: "1px solid #f1f5f9" }}>
+            <div style={{ width: "50%", height: 16, background: "#f1f5f9", borderRadius: 4 }} />
+          </div>
+          <div style={{ padding: 20 }}>
+            {[1, 2, 3].map((_, i) => (
+              <div key={i} style={{ display: "flex", justifyContent: "space-between", marginBottom: 12 }}>
+                <div style={{ width: "50%", height: 12, background: "#f1f5f9", borderRadius: 4 }} />
+                <div style={{ width: "20%", height: 12, background: "#f1f5f9", borderRadius: 4 }} />
+              </div>
+            ))}
+          </div>
+        </div>
       </div>
     </div>
   );
@@ -57,20 +81,14 @@ function CheckoutSkeleton() {
 
 export default function Checkout() {
   const navigate = useNavigate();
-  const [step, setStep] = useState(1);
   const [selectedAddress, setSelectedAddress] = useState(null);
-  const [paymentMethod, setPaymentMethod] = useState("CASH");
+  const [paymentMethod, setPaymentMethod] = useState("RAZORPAY");
   const [showAddressDialog, setShowAddressDialog] = useState(false);
   const [editingAddress, setEditingAddress] = useState(null);
   const [addressForm, setAddressForm] = useState({
-    name: "",
-    phone: "",
-    address: "",
-    city: "",
-    state: "",
-    pincode: "",
-    type: "home",
+    fullName: "", phone: "", addressLine1: "", addressLine2: "", city: "", state: "", pincode: "", landmark: "",
   });
+  const [formErrors, setFormErrors] = useState({});
 
   const { data: cartData, isLoading: loadingCart } = useCart();
   const { data: addressesData, isLoading: loadingAddresses } = useAddresses();
@@ -82,50 +100,47 @@ export default function Checkout() {
   const cart = cartData?.cart || null;
   const addresses = addressesData?.addresses || [];
   const loading = loadingCart || loadingAddresses;
+  const firstAddressId = addresses[0]?._id;
 
   useEffect(() => {
     if (addresses.length > 0 && !selectedAddress) {
-      setSelectedAddress(addresses[0]._id);
+      setSelectedAddress(firstAddressId);
     }
-  }, [addresses, selectedAddress]);
+  }, [addresses.length, firstAddressId, selectedAddress]);
 
   const items = cart?.items || [];
   const subtotal = cart?.subtotal || items.reduce(
-    (sum, item) => sum + (item.product?.price || item.price || 0) * item.qty,
-    0
+    (sum, item) => sum + (item.price || 0) * item.quantity, 0
   );
   const gst = cart?.gstAmount || subtotal * 0.18;
   const discount = cart?.discount || 0;
   const grandTotal = cart?.grandTotal || subtotal + gst - discount;
 
+  const validateForm = () => {
+    const errors = {};
+    if (!addressForm.fullName.trim()) errors.fullName = "Full name is required";
+    if (!addressForm.phone.trim()) errors.phone = "Phone number is required";
+    else if (!/^\d{10}$/.test(addressForm.phone.replace(/\s/g, ""))) errors.phone = "Enter a valid 10-digit phone number";
+    if (!addressForm.addressLine1.trim()) errors.addressLine1 = "Address is required";
+    if (!addressForm.city.trim()) errors.city = "City is required";
+    if (!addressForm.state.trim()) errors.state = "State is required";
+    if (!addressForm.pincode.trim()) errors.pincode = "Pincode is required";
+    else if (!/^\d{6}$/.test(addressForm.pincode.trim())) errors.pincode = "Enter a valid 6-digit pincode";
+    setFormErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
+
   const handleSaveAddress = () => {
-    if (!addressForm.name || !addressForm.phone || !addressForm.address || !addressForm.city || !addressForm.state || !addressForm.pincode) {
-      toast.error("Please fill all required fields");
-      return;
-    }
+    if (!validateForm()) return;
+    const resetForm = { fullName: "", phone: "", addressLine1: "", addressLine2: "", city: "", state: "", pincode: "", landmark: "" };
     if (editingAddress) {
       updateAddress.mutate(
         { id: editingAddress, data: addressForm },
-        {
-          onSuccess: () => {
-            toast.success("Address updated");
-            setShowAddressDialog(false);
-            setEditingAddress(null);
-            setAddressForm({ name: "", phone: "", address: "", city: "", state: "", pincode: "", type: "home" });
-          },
-          onError: () => toast.error("Failed to save address"),
-        }
+        { onSuccess: () => { toast.success("Address updated"); setShowAddressDialog(false); setEditingAddress(null); setAddressForm(resetForm); setFormErrors({}); }, onError: () => toast.error("Failed to save address") }
       );
     } else {
       createAddress.mutate(addressForm, {
-        onSuccess: (res) => {
-          const newAddr = res.address;
-          if (newAddr) setSelectedAddress(newAddr._id);
-          toast.success("Address added");
-          setShowAddressDialog(false);
-          setEditingAddress(null);
-          setAddressForm({ name: "", phone: "", address: "", city: "", state: "", pincode: "", type: "home" });
-        },
+        onSuccess: (res) => { if (res.address) setSelectedAddress(res.address._id); toast.success("Address added"); setShowAddressDialog(false); setEditingAddress(null); setAddressForm(resetForm); setFormErrors({}); },
         onError: () => toast.error("Failed to save address"),
       });
     }
@@ -133,469 +148,378 @@ export default function Checkout() {
 
   const handleDeleteAddress = (id) => {
     deleteAddress.mutate(id, {
-      onSuccess: () => {
-        toast.success("Address deleted");
-        if (selectedAddress === id) setSelectedAddress(null);
-      },
+      onSuccess: () => { toast.success("Address deleted"); if (selectedAddress === id) setSelectedAddress(null); },
       onError: () => toast.error("Failed to delete address"),
     });
   };
 
   const handlePlaceOrder = () => {
-    if (!selectedAddress) {
-      toast.error("Please select a delivery address");
-      return;
-    }
+    if (!selectedAddress) { toast.error("Please select a delivery address"); return; }
     checkout.mutate(
       { addressId: selectedAddress, paymentMethod },
       {
         onSuccess: (res) => {
-          toast.success("Order placed successfully!");
-          navigate(`/orders/${res.data?._id || ""}`);
+          if (res.razorpayOrderId) {
+            openRazorpay(res);
+          } else {
+            toast.success("Order placed successfully!");
+            navigate(`/orders/${res.order?.id || ""}`);
+          }
         },
         onError: (err) => toast.error(err.message || "Failed to place order"),
       }
     );
   };
 
+  const openRazorpay = (orderData) => {
+    const options = {
+      key: import.meta.env.VITE_RAZORPAY_KEY_ID,
+      amount: orderData.amount * 100,
+      currency: "INR",
+      name: "Ambika Krishi Yantra",
+      description: "Order Payment",
+      order_id: orderData.razorpayOrderId,
+      handler: async function (response) {
+        try {
+          const verifyRes = await fetch("/api/razorpay/verify", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            credentials: "include",
+            body: JSON.stringify({
+              razorpay_order_id: response.razorpay_order_id,
+              razorpay_payment_id: response.razorpay_payment_id,
+              razorpay_signature: response.razorpay_signature,
+            }),
+          });
+          const data = await verifyRes.json();
+          if (data.success) {
+            toast.success("Payment successful!");
+            navigate(`/orders/${orderData.order?.id || ""}`);
+          } else {
+            toast.error("Payment verification failed. Contact support.");
+          }
+        } catch {
+          toast.error("Payment verification failed. Contact support.");
+        }
+      },
+      modal: {
+        ondismiss: function () {
+          toast.info("Payment cancelled. Your order is pending.");
+        },
+      },
+      prefill: { name: orderData.customerName || "", email: orderData.email || "", contact: orderData.phone || "" },
+      theme: { color: "#16a34a" },
+    };
+    const rzp = new window.Razorpay(options);
+    rzp.open();
+  };
+
   if (loading) return <CheckoutSkeleton />;
 
   if (items.length === 0) {
     return (
-      <div className="max-w-5xl mx-auto px-4 py-16 text-center">
-        <h2 className="text-2xl font-bold mb-2">Your cart is empty</h2>
-        <p className="text-muted-foreground mb-6">Add items to your cart to checkout.</p>
-        <Button asChild>
-          <Link to="/shop">Continue Shopping</Link>
-        </Button>
+      <div className="shop-page">
+        <div className="empty-state" style={{ marginTop: 24 }}>
+          <div className="empty-state-icon"><ShoppingBag className="h-12 w-12" /></div>
+          <h3>Your cart is empty</h3>
+          <p>Add items to your cart to checkout.</p>
+          <Link to="/shop" className="empty-state-btn"><ShoppingBag className="h-4 w-4" /> Browse Products</Link>
+        </div>
       </div>
     );
   }
 
   const selectedAddr = addresses.find((a) => a._id === selectedAddress);
 
-  const paymentMethods = [
-    { value: "CASH", label: "Cash on Delivery", icon: Banknote },
-    { value: "CARD", label: "Credit / Debit Card", icon: CreditCard },
-    { value: "UPI", label: "UPI Payment", icon: Smartphone },
-    { value: "BANK_TRANSFER", label: "Bank Transfer", icon: Building2 },
-  ];
-
-  const steps = [
-    { num: 1, label: "Address", icon: MapPin },
-    { num: 2, label: "Payment", icon: CreditCard },
-    { num: 3, label: "Review", icon: ClipboardCheck },
-  ];
-
   return (
-    <div className="max-w-5xl mx-auto px-4 py-8">
-      <Button variant="ghost" size="sm" onClick={() => navigate(-1)} className="mb-4">
-        <ArrowLeft className="h-4 w-4 mr-2" />
-        Back
-      </Button>
-
-      <h1 className="text-2xl font-bold mb-6">Checkout</h1>
-
-      {/* Step Indicators */}
-      <div className="flex items-center justify-center mb-8">
-        {steps.map((s, i) => (
-          <div key={s.num} className="flex items-center">
-            <button
-              onClick={() => s.num <= step && setStep(s.num)}
-              className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-colors ${
-                step === s.num
-                  ? "bg-primary text-primary-foreground"
-                  : step > s.num
-                  ? "bg-green-100 text-green-700"
-                  : "bg-muted text-muted-foreground"
-              }`}
-            >
-              {step > s.num ? (
-                <CheckCircle className="h-4 w-4" />
-              ) : (
-                <s.icon className="h-4 w-4" />
-              )}
-              {s.label}
-            </button>
-            {i < steps.length - 1 && (
-              <div
-                className={`w-12 h-0.5 mx-2 ${
-                  step > s.num ? "bg-green-500" : "bg-muted"
-                }`}
-              />
-            )}
+    <div className="shop-page">
+      {/* Hero */}
+      <div className="page-hero page-hero-green">
+        <div className="page-hero-inner">
+          <div className="page-hero-content">
+            <ClipboardCheck className="h-6 w-6" />
+            <div>
+              <h1>Secure Checkout</h1>
+              <p>{items.length} item{items.length !== 1 ? "s" : ""} • {formatCurrency(grandTotal)}</p>
+            </div>
           </div>
-        ))}
+        </div>
       </div>
 
-      <div className="grid lg:grid-cols-3 gap-8">
-        {/* Main Content */}
-        <div className="lg:col-span-2">
-          {/* Step 1: Address */}
-          {step === 1 && (
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between">
-                <CardTitle>Delivery Address</CardTitle>
-                <Button
-                  size="sm"
-                  onClick={() => {
-                    setEditingAddress(null);
-                    setAddressForm({ name: "", phone: "", address: "", city: "", state: "", pincode: "", type: "home" });
-                    setShowAddressDialog(true);
-                  }}
-                >
-                  <Plus className="h-4 w-4 mr-2" />
-                  Add New
-                </Button>
-              </CardHeader>
-              <CardContent className="space-y-3">
+      <div className="checkout-layout">
+        {/* Main Content - Single Card */}
+        <div>
+          <div className="checkout-card">
+            <div className="checkout-card-header">
+              <h3><ClipboardCheck /> Complete Your Order</h3>
+            </div>
+            <div className="checkout-card-body">
+
+              {/* Section 1: Delivery Address */}
+              <div className="checkout-section">
+                <div className="checkout-section-title">
+                  <div className="checkout-section-num">1</div>
+                  <MapPin />
+                  <span>Delivery Address</span>
+                  {selectedAddr && <span className="checkout-section-done"><BadgeCheck /> Selected</span>}
+                </div>
                 {addresses.length === 0 ? (
-                  <p className="text-muted-foreground text-center py-8">
-                    No saved addresses. Please add one.
-                  </p>
+                  <div className="addr-empty">
+                    <div className="addr-empty-icon"><MapPin /></div>
+                    <p>No saved addresses yet</p>
+                    <button className="checkout-add-btn" style={{ margin: "12px auto 0" }} onClick={() => { setEditingAddress(null); setAddressForm({ name: "", phone: "", address: "", city: "", state: "", pincode: "", type: "home" }); setShowAddressDialog(true); }}>
+                      <Plus /> Add Address
+                    </button>
+                  </div>
                 ) : (
-                  addresses.map((addr) => (
-                    <div
-                      key={addr._id}
-                      className={`border rounded-lg p-4 cursor-pointer transition-colors ${
-                        selectedAddress === addr._id
-                          ? "border-primary bg-primary/5"
-                          : "hover:border-muted-foreground/30"
-                      }`}
-                      onClick={() => setSelectedAddress(addr._id)}
-                    >
-                      <div className="flex items-start justify-between">
-                        <div className="flex items-start gap-3">
-                          <input
-                            type="radio"
-                            checked={selectedAddress === addr._id}
-                            onChange={() => setSelectedAddress(addr._id)}
-                            className="mt-1"
-                          />
-                          <div>
-                            <div className="flex items-center gap-2">
-                              <span className="font-medium">{addr.name}</span>
-                              <Badge variant="secondary" className="text-xs">
-                                {addr.type || "home"}
-                              </Badge>
-                            </div>
-                            <p className="text-sm text-muted-foreground mt-1">
-                              {addr.address}, {addr.city}, {addr.state} - {addr.pincode}
-                            </p>
-                            <p className="text-sm text-muted-foreground">
-                              Phone: {addr.phone}
-                            </p>
-                          </div>
+                  <>
+                    {addresses.map((addr) => (
+                      <div key={addr._id} className={`addr-card ${selectedAddress === addr._id ? "selected" : ""}`} onClick={() => setSelectedAddress(addr._id)}>
+                        <div className="addr-radio" />
+                        <div className="addr-info">
+                          <p className="addr-name">{addr.fullName}</p>
+                          <p className="addr-text">{addr.addressLine1}{addr.addressLine2 ? `, ${addr.addressLine2}` : ""}, {addr.city}, {addr.state} - {addr.pincode}</p>
+                          <p className="addr-text" style={{ marginTop: 2 }}>Phone: {addr.phone}</p>
                         </div>
-                        <div className="flex gap-1">
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setEditingAddress(addr._id);
-                              setAddressForm({
-                                name: addr.name,
-                                phone: addr.phone,
-                                address: addr.address,
-                                city: addr.city,
-                                state: addr.state,
-                                pincode: addr.pincode,
-                                type: addr.type || "home",
-                              });
-                              setShowAddressDialog(true);
-                            }}
-                          >
-                            <Pencil className="h-3 w-3" />
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleDeleteAddress(addr._id);
-                            }}
-                          >
-                            <Trash2 className="h-3 w-3" />
-                          </Button>
+                        <div className="addr-actions">
+                          <button className="addr-action-btn" title="Edit" onClick={(e) => { e.stopPropagation(); setEditingAddress(addr._id); setAddressForm({ fullName: addr.fullName, phone: addr.phone, addressLine1: addr.addressLine1, addressLine2: addr.addressLine2 || "", city: addr.city, state: addr.state, pincode: addr.pincode, landmark: addr.landmark || "" }); setShowAddressDialog(true); }}>
+                            <Pencil />
+                          </button>
+                          <button className="addr-action-btn" title="Delete" onClick={(e) => { e.stopPropagation(); handleDeleteAddress(addr._id); }}>
+                            <Trash2 />
+                          </button>
                         </div>
                       </div>
-                    </div>
-                  ))
+                    ))}
+                    <button className="checkout-add-btn" onClick={() => { setEditingAddress(null); setAddressForm({ fullName: "", phone: "", addressLine1: "", addressLine2: "", city: "", state: "", pincode: "", landmark: "" }); setShowAddressDialog(true); }}>
+                      <Plus /> Add New Address
+                    </button>
+                  </>
                 )}
-                <Button
-                  className="w-full mt-4"
-                  onClick={() => {
-                    if (!selectedAddress) {
-                      toast.error("Please select an address");
-                      return;
-                    }
-                    setStep(2);
-                  }}
-                >
-                  Continue to Payment
-                </Button>
-              </CardContent>
-            </Card>
-          )}
+              </div>
 
-          {/* Step 2: Payment */}
-          {step === 2 && (
-            <Card>
-              <CardHeader>
-                <CardTitle>Payment Method</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <RadioGroup
-                  value={paymentMethod}
-                  onValueChange={setPaymentMethod}
-                  className="space-y-3"
-                >
-                  {paymentMethods.map((pm) => (
-                    <label
-                      key={pm.value}
-                      className={`flex items-center gap-4 border rounded-lg p-4 cursor-pointer transition-colors ${
-                        paymentMethod === pm.value
-                          ? "border-primary bg-primary/5"
-                          : "hover:border-muted-foreground/30"
-                      }`}
-                    >
-                      <RadioGroupItem value={pm.value} />
-                      <pm.icon className="h-5 w-5 text-muted-foreground" />
-                      <span className="font-medium">{pm.label}</span>
-                    </label>
-                  ))}
-                </RadioGroup>
-                <div className="flex gap-3 mt-4">
-                  <Button variant="outline" onClick={() => setStep(1)}>
-                    Back
-                  </Button>
-                  <Button className="flex-1" onClick={() => setStep(3)}>
-                    Review Order
-                  </Button>
+              <div className="checkout-section-divider" />
+
+              {/* Section 2: Payment */}
+              <div className="checkout-section">
+                <div className="checkout-section-title">
+                  <div className="checkout-section-num">2</div>
+                  <CreditCard />
+                  <span>Payment</span>
                 </div>
-              </CardContent>
-            </Card>
-          )}
-
-          {/* Step 3: Review */}
-          {step === 3 && (
-            <Card>
-              <CardHeader>
-                <CardTitle>Review Order</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                {/* Delivery Address */}
-                <div>
-                  <h4 className="font-medium text-sm text-muted-foreground mb-2">
-                    Delivery Address
-                  </h4>
-                  {selectedAddr && (
-                    <div className="border rounded-lg p-3">
-                      <p className="font-medium">{selectedAddr.name}</p>
-                      <p className="text-sm text-muted-foreground">
-                        {selectedAddr.address}, {selectedAddr.city}, {selectedAddr.state} - {selectedAddr.pincode}
-                      </p>
-                      <p className="text-sm text-muted-foreground">Phone: {selectedAddr.phone}</p>
-                      <Button variant="link" size="sm" className="px-0" onClick={() => setStep(1)}>
-                        Change
-                      </Button>
-                    </div>
-                  )}
-                </div>
-
-                {/* Payment Method */}
-                <div>
-                  <h4 className="font-medium text-sm text-muted-foreground mb-2">
-                    Payment Method
-                  </h4>
-                  <div className="border rounded-lg p-3 flex items-center gap-2">
-                    <CreditCard className="h-5 w-5" />
-                    <span className="font-medium">
-                      {paymentMethods.find((pm) => pm.value === paymentMethod)?.label}
-                    </span>
-                    <Button variant="link" size="sm" className="px-0 ml-auto" onClick={() => setStep(2)}>
-                      Change
-                    </Button>
-                  </div>
-                </div>
-
-                {/* Items */}
-                <div>
-                  <h4 className="font-medium text-sm text-muted-foreground mb-2">
-                    Order Items ({items.length})
-                  </h4>
-                  <div className="space-y-2">
-                    {items.map((item) => {
-                      const product = item.product || item;
-                      return (
-                        <div key={item._id || product._id} className="flex items-center gap-3 border rounded-lg p-3">
-                          <img
-                            src={product.images?.[0] || "/placeholder.png"}
-                            alt={product.name}
-                            className="h-12 w-12 object-cover rounded"
-                          />
-                          <div className="flex-1 min-w-0">
-                            <p className="text-sm font-medium line-clamp-1">{product.name}</p>
-                            <p className="text-xs text-muted-foreground">Qty: {item.qty}</p>
-                          </div>
-                          <span className="text-sm font-medium">
-                            {formatCurrency((product.price || 0) * item.qty)}
-                          </span>
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
-
-                <div className="flex gap-3">
-                  <Button variant="outline" onClick={() => setStep(2)}>
-                    Back
-                  </Button>
-                  <Button
-                    className="flex-1"
-                    size="lg"
-                    onClick={handlePlaceOrder}
-                    disabled={checkout.isPending}
+                <div className="pay-choose-list">
+                  <div
+                    className={`pay-choose-card ${paymentMethod === "RAZORPAY" ? "selected" : ""}`}
+                    onClick={() => setPaymentMethod("RAZORPAY")}
                   >
-                    {checkout.isPending ? "Placing Order..." : `Place Order - ${formatCurrency(grandTotal)}`}
-                  </Button>
+                    <div className="pay-choose-left">
+                      <div className="pay-choose-radio">
+                        {paymentMethod === "RAZORPAY" && <div className="pay-choose-radio-dot" />}
+                      </div>
+                      <div className="pay-choose-icon" style={{ background: "#16a34a", color: "#fff" }}>
+                        <Smartphone />
+                      </div>
+                      <div className="pay-choose-info">
+                        <p className="pay-choose-title">Pay via Razorpay</p>
+                        <p className="pay-choose-desc">UPI, Credit/Debit Cards, Net Banking, Wallets</p>
+                      </div>
+                    </div>
+                    {paymentMethod === "RAZORPAY" && <ShieldCheck style={{ width: 18, height: 18, color: "#16a34a", flexShrink: 0 }} />}
+                  </div>
+
+                  <div
+                    className={`pay-choose-card ${paymentMethod === "COD" ? "selected" : ""}`}
+                    onClick={() => setPaymentMethod("COD")}
+                  >
+                    <div className="pay-choose-left">
+                      <div className="pay-choose-radio">
+                        {paymentMethod === "COD" && <div className="pay-choose-radio-dot" />}
+                      </div>
+                      <div className="pay-choose-icon" style={{ background: "#fff7ed", color: "#ea580c" }}>
+                        <Banknote />
+                      </div>
+                      <div className="pay-choose-info">
+                        <p className="pay-choose-title">Cash on Delivery</p>
+                        <p className="pay-choose-desc">Pay when your order arrives at your doorstep</p>
+                      </div>
+                    </div>
+                    {paymentMethod === "COD" && <BadgeCheck style={{ width: 18, height: 18, color: "#16a34a", flexShrink: 0 }} />}
+                  </div>
                 </div>
-              </CardContent>
-            </Card>
-          )}
+
+                {paymentMethod === "RAZORPAY" && (
+                  <div className="pay-trust-row">
+                    <Lock style={{ width: "13px", height: "13px" }} />
+                    <span>Secured by Razorpay — 256-bit SSL encryption</span>
+                  </div>
+                )}
+                {paymentMethod === "COD" && (
+                  <div className="pay-trust-row" style={{ background: "#fff7ed" }}>
+                    <Banknote style={{ width: "13px", height: "13px", color: "#ea580c" }} />
+                    <span style={{ color: "#9a3412" }}>Pay cash when your order is delivered</span>
+                  </div>
+                )}
+              </div>
+
+              <div className="checkout-section-divider" />
+
+              {/* Section 3: Order Items */}
+              <div className="checkout-section">
+                <div className="checkout-section-title">
+                  <div className="checkout-section-num">3</div>
+                  <ShoppingBag />
+                  <span>Order Items ({items.length})</span>
+                </div>
+                {items.map((item) => {
+                  const product = item.productId || {};
+                  return (
+                    <div key={product._id} className="review-item">
+                      <img src={product.images?.[0] || "/placeholder.png"} alt={product.name} />
+                      <div className="review-item-info">
+                        <p className="review-item-name">{product.name}</p>
+                        <p className="review-item-qty">Qty: {item.quantity} × {formatCurrency(item.price)}</p>
+                      </div>
+                      <span className="review-item-price">{formatCurrency(item.price * item.quantity)}</span>
+                    </div>
+                  );
+                })}
+              </div>
+
+              <div className="checkout-section-divider" />
+
+              {/* Place Order */}
+              <div className="checkout-btn-row">
+                <button
+                  className="checkout-btn-next checkout-btn-place"
+                  onClick={handlePlaceOrder}
+                  disabled={checkout.isPending || !selectedAddress}
+                >
+                  {checkout.isPending ? (
+                    <>Processing...</>
+                  ) : paymentMethod === "COD" ? (
+                    <><CircleDollarSign style={{ width: 16, height: 16 }} /> Place Order</>
+                  ) : (
+                    <><Lock style={{ width: 16, height: 16 }} /> Pay {formatCurrency(grandTotal)} via Razorpay</>
+                  )}
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
 
         {/* Order Summary Sidebar */}
         <div>
-          <Card className="sticky top-24">
-            <CardHeader>
-              <CardTitle>Order Summary</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3">
+          <div className="checkout-summary">
+            <div className="checkout-summary-header">
+              <h3>Order Summary</h3>
+            </div>
+            <div className="checkout-summary-body">
               {items.map((item) => {
-                const product = item.product || item;
+                const product = item.productId || {};
                 return (
-                  <div key={item._id || product._id} className="flex justify-between text-sm">
-                    <span className="text-muted-foreground line-clamp-1">
-                      {product.name} x {item.qty}
-                    </span>
-                    <span>{formatCurrency((product.price || 0) * item.qty)}</span>
+                  <div key={product._id} className="summary-item">
+                    <span className="label">{product.name} × {item.quantity}</span>
+                    <span className="value">{formatCurrency(item.price * item.quantity)}</span>
                   </div>
                 );
               })}
-              <Separator />
-              <div className="flex justify-between text-sm">
-                <span className="text-muted-foreground">Subtotal</span>
-                <span>{formatCurrency(subtotal)}</span>
+              <div className="summary-divider" />
+              <div className="summary-row">
+                <span className="label">Subtotal</span>
+                <span className="value">{formatCurrency(subtotal)}</span>
               </div>
-              <div className="flex justify-between text-sm">
-                <span className="text-muted-foreground">GST (18%)</span>
-                <span>{formatCurrency(gst)}</span>
+              <div className="summary-row">
+                <span className="label">GST (18%)</span>
+                <span className="value">{formatCurrency(gst)}</span>
+              </div>
+              <div className="summary-row">
+                <span className="label">Delivery</span>
+                <span className="value" style={{ color: "#16a34a", fontWeight: 600 }}>FREE</span>
               </div>
               {discount > 0 && (
-                <div className="flex justify-between text-sm text-green-600">
-                  <span>Discount</span>
-                  <span>-{formatCurrency(discount)}</span>
+                <div className="summary-row discount">
+                  <span className="label">Discount</span>
+                  <span className="value">-{formatCurrency(discount)}</span>
                 </div>
               )}
-              <Separator />
-              <div className="flex justify-between font-bold text-lg">
-                <span>Total</span>
-                <span>{formatCurrency(grandTotal)}</span>
+              <div className="summary-divider" />
+              <div className="summary-total">
+                <span className="label">Total</span>
+                <span className="value">{formatCurrency(grandTotal)}</span>
               </div>
-            </CardContent>
-          </Card>
+            </div>
+            <div style={{ padding: "0 24px 20px" }}>
+              <div className="trust-badge blue">
+                <ShieldCheck /> 100% secure checkout
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 
       {/* Address Dialog */}
-      <Dialog open={showAddressDialog} onOpenChange={setShowAddressDialog}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle>{editingAddress ? "Edit Address" : "Add New Address"}</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <Label htmlFor="addr-name">Full Name *</Label>
-                <Input
-                  id="addr-name"
-                  value={addressForm.name}
-                  onChange={(e) => setAddressForm((p) => ({ ...p, name: e.target.value }))}
-                />
+      {showAddressDialog && (
+        <div className="addr-dialog-overlay" onClick={() => { setShowAddressDialog(false); setFormErrors({}); }}>
+          <div className="addr-dialog" onClick={(e) => e.stopPropagation()}>
+            <div className="addr-dialog-header">
+              <h3>{editingAddress ? "Edit Address" : "Add New Address"}</h3>
+              <button className="addr-dialog-close" onClick={() => { setShowAddressDialog(false); setFormErrors({}); }}><X /></button>
+            </div>
+            <div className="addr-dialog-body">
+              <div className="addr-form-row">
+                <div className="addr-form-group">
+                  <label>Full Name <span className="required">*</span></label>
+                  <input className={`addr-form-input ${formErrors.fullName ? "error" : ""}`} value={addressForm.fullName} onChange={(e) => { setAddressForm((p) => ({ ...p, fullName: e.target.value })); if (formErrors.fullName) setFormErrors((p) => ({ ...p, fullName: "" })); }} placeholder="John Doe" />
+                  {formErrors.fullName && <p className="addr-form-error"><AlertCircle /> {formErrors.fullName}</p>}
+                </div>
+                <div className="addr-form-group">
+                  <label>Phone <span className="required">*</span></label>
+                  <input className={`addr-form-input ${formErrors.phone ? "error" : ""}`} value={addressForm.phone} onChange={(e) => { setAddressForm((p) => ({ ...p, phone: e.target.value })); if (formErrors.phone) setFormErrors((p) => ({ ...p, phone: "" })); }} placeholder="98765 43210" />
+                  {formErrors.phone && <p className="addr-form-error"><AlertCircle /> {formErrors.phone}</p>}
+                </div>
               </div>
-              <div>
-                <Label htmlFor="addr-phone">Phone *</Label>
-                <Input
-                  id="addr-phone"
-                  value={addressForm.phone}
-                  onChange={(e) => setAddressForm((p) => ({ ...p, phone: e.target.value }))}
-                />
+              <div className="addr-form-group">
+                <label>Address Line 1 <span className="required">*</span></label>
+                <input className={`addr-form-input ${formErrors.addressLine1 ? "error" : ""}`} value={addressForm.addressLine1} onChange={(e) => { setAddressForm((p) => ({ ...p, addressLine1: e.target.value })); if (formErrors.addressLine1) setFormErrors((p) => ({ ...p, addressLine1: "" })); }} placeholder="Street address, apartment, etc." />
+                {formErrors.addressLine1 && <p className="addr-form-error"><AlertCircle /> {formErrors.addressLine1}</p>}
+              </div>
+              <div className="addr-form-group">
+                <label>Address Line 2</label>
+                <input className="addr-form-input" value={addressForm.addressLine2} onChange={(e) => setAddressForm((p) => ({ ...p, addressLine2: e.target.value }))} placeholder="Flat, building, floor (optional)" />
+              </div>
+              <div className="addr-form-row">
+                <div className="addr-form-group">
+                  <label>City <span className="required">*</span></label>
+                  <input className={`addr-form-input ${formErrors.city ? "error" : ""}`} value={addressForm.city} onChange={(e) => { setAddressForm((p) => ({ ...p, city: e.target.value })); if (formErrors.city) setFormErrors((p) => ({ ...p, city: "" })); }} />
+                  {formErrors.city && <p className="addr-form-error"><AlertCircle /> {formErrors.city}</p>}
+                </div>
+                <div className="addr-form-group">
+                  <label>State <span className="required">*</span></label>
+                  <input className={`addr-form-input ${formErrors.state ? "error" : ""}`} value={addressForm.state} onChange={(e) => { setAddressForm((p) => ({ ...p, state: e.target.value })); if (formErrors.state) setFormErrors((p) => ({ ...p, state: "" })); }} />
+                  {formErrors.state && <p className="addr-form-error"><AlertCircle /> {formErrors.state}</p>}
+                </div>
+              </div>
+              <div className="addr-form-row">
+                <div className="addr-form-group">
+                  <label>Pincode <span className="required">*</span></label>
+                  <input className={`addr-form-input ${formErrors.pincode ? "error" : ""}`} value={addressForm.pincode} onChange={(e) => { setAddressForm((p) => ({ ...p, pincode: e.target.value })); if (formErrors.pincode) setFormErrors((p) => ({ ...p, pincode: "" })); }} placeholder="456771" />
+                  {formErrors.pincode && <p className="addr-form-error"><AlertCircle /> {formErrors.pincode}</p>}
+                </div>
+                <div className="addr-form-group">
+                  <label>Landmark</label>
+                  <input className="addr-form-input" value={addressForm.landmark} onChange={(e) => setAddressForm((p) => ({ ...p, landmark: e.target.value }))} placeholder="Near temple, hospital (optional)" />
+                </div>
               </div>
             </div>
-            <div>
-              <Label htmlFor="addr-address">Address *</Label>
-              <Input
-                id="addr-address"
-                value={addressForm.address}
-                onChange={(e) => setAddressForm((p) => ({ ...p, address: e.target.value }))}
-                placeholder="Street address, apartment, etc."
-              />
-            </div>
-            <div className="grid grid-cols-3 gap-4">
-              <div>
-                <Label htmlFor="addr-city">City *</Label>
-                <Input
-                  id="addr-city"
-                  value={addressForm.city}
-                  onChange={(e) => setAddressForm((p) => ({ ...p, city: e.target.value }))}
-                />
-              </div>
-              <div>
-                <Label htmlFor="addr-state">State *</Label>
-                <Input
-                  id="addr-state"
-                  value={addressForm.state}
-                  onChange={(e) => setAddressForm((p) => ({ ...p, state: e.target.value }))}
-                />
-              </div>
-              <div>
-                <Label htmlFor="addr-pincode">Pincode *</Label>
-                <Input
-                  id="addr-pincode"
-                  value={addressForm.pincode}
-                  onChange={(e) => setAddressForm((p) => ({ ...p, pincode: e.target.value }))}
-                />
-              </div>
-            </div>
-            <div>
-              <Label>Address Type</Label>
-              <div className="flex gap-2 mt-1">
-                {["home", "work", "other"].map((t) => (
-                  <Button
-                    key={t}
-                    variant={addressForm.type === t ? "default" : "outline"}
-                    size="sm"
-                    onClick={() => setAddressForm((p) => ({ ...p, type: t }))}
-                    className="capitalize"
-                  >
-                    {t}
-                  </Button>
-                ))}
-              </div>
+            <div className="addr-dialog-footer">
+              <button className="checkout-btn-back" onClick={() => { setShowAddressDialog(false); setFormErrors({}); }}>Cancel</button>
+              <button className="checkout-btn-next" style={{ background: "#16a34a", color: "#fff", border: "none" }} onClick={handleSaveAddress} disabled={createAddress.isPending || updateAddress.isPending}>
+                {editingAddress ? "Update" : "Save"} Address
+              </button>
             </div>
           </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setShowAddressDialog(false)}>
-              Cancel
-            </Button>
-            <Button onClick={handleSaveAddress} disabled={createAddress.isPending || updateAddress.isPending}>
-              {editingAddress ? "Update" : "Save"} Address
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+        </div>
+      )}
     </div>
   );
 }

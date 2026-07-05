@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { X, LogOut, User, ShoppingBag, Heart, ChevronDown, Menu } from "lucide-react";
 import { useCustomerAuth } from "@/contexts/CustomerAuthContext";
-import { useCart } from "@/hooks/useQueries";
+import { useCart, useWishlist } from "@/hooks/useQueries";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -22,8 +22,10 @@ export default function CustomerNavbar({ onCartClick }) {
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const { user, logout } = useCustomerAuth();
   const { data: cartData } = useCart(!!user);
+  const { data: wishlistData } = useWishlist(!!user);
   const navigate = useNavigate();
   const cartCount = cartData?.cart?.items?.length || 0;
+  const wishlistCount = wishlistData?.wishlist?.length || 0;
 
   const initials = user?.name
     ? user.name.split(" ").map((n) => n[0]).join("").toUpperCase().slice(0, 2)
@@ -84,10 +86,17 @@ export default function CustomerNavbar({ onCartClick }) {
             {/* Wishlist - only when logged in */}
             {user && (
               <button
-                className="hidden sm:flex flex-col items-center gap-0.5 px-3 py-1 text-gray-600 hover:text-green-600 transition-colors"
+                className="flex flex-col items-center gap-0.5 px-3 py-1 text-gray-600 hover:text-green-600 transition-colors relative"
                 onClick={() => navigate("/wishlist")}
               >
-                <Heart className="h-5 w-5" />
+                <div className="relative">
+                  <Heart className="h-5 w-5" />
+                  {wishlistCount > 0 && (
+                    <span className="absolute -top-1.5 -right-1.5 bg-green-600 text-white text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center">
+                      {wishlistCount}
+                    </span>
+                  )}
+                </div>
                 <span className="text-[10px] font-medium">Wishlist</span>
               </button>
             )}

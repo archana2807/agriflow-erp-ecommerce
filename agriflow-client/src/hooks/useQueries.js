@@ -345,7 +345,7 @@ export function useCart(enabled = true) {
 export function useAddToCart() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: ({ productId, qty }) => shopService.addToCart(productId, qty),
+    mutationFn: ({ productId, quantity }) => shopService.addToCart(productId, quantity),
     onSuccess: () => qc.invalidateQueries({ queryKey: ["cart"] }),
   });
 }
@@ -353,7 +353,7 @@ export function useAddToCart() {
 export function useUpdateCart() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: ({ productId, qty }) => shopService.updateCart(productId, qty),
+    mutationFn: ({ productId, quantity }) => shopService.updateCart(productId, quantity),
     onSuccess: () => qc.invalidateQueries({ queryKey: ["cart"] }),
   });
 }

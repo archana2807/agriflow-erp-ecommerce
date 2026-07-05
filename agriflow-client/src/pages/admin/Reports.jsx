@@ -54,39 +54,39 @@ export default function Reports() {
   const [dateTo, setDateTo] = useState("");
 
   return (
-    <div className="erp-page">
-      <div className="erp-page-header">
-        <div>
-          <h1 className="erp-page-title">Reports</h1>
-          <p className="erp-page-subtitle">Analytics and insights</p>
-        </div>
+    <div className="space-y-6">
+      <div>
+        <h2 className="text-2xl font-bold tracking-tight text-slate-900">Reports</h2>
+        <p className="text-sm text-slate-500 mt-1">Analytics and insights</p>
       </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
+      <Card className="border-slate-200 shadow-sm">
+        <CardHeader className="p-5 pb-4">
+          <CardTitle className="flex items-center gap-2 text-base font-semibold text-slate-900">
             <Calendar className="h-5 w-5" />
             Date Range Filter
           </CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className="pt-0">
           <div className="flex gap-4 items-end">
-            <div className="space-y-2">
-              <Label htmlFor="from">From</Label>
+            <div className="space-y-1.5">
+              <Label className="text-sm font-medium text-slate-700">From</Label>
               <Input
                 id="from"
                 type="date"
                 value={dateFrom}
                 onChange={(e) => setDateFrom(e.target.value)}
+                className="border-slate-200 focus-visible:ring-slate-400/20"
               />
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="to">To</Label>
+            <div className="space-y-1.5">
+              <Label className="text-sm font-medium text-slate-700">To</Label>
               <Input
                 id="to"
                 type="date"
                 value={dateTo}
                 onChange={(e) => setDateTo(e.target.value)}
+                className="border-slate-200 focus-visible:ring-slate-400/20"
               />
             </div>
           </div>
@@ -94,53 +94,53 @@ export default function Reports() {
       </Card>
 
       <div className="grid gap-4 md:grid-cols-3">
-        <Card>
-          <CardContent className="p-6">
+        <Card className="border-slate-200 shadow-sm">
+          <CardContent className="p-5">
             <div className="flex items-center gap-4">
-              <div className="rounded-full bg-green-100 p-3">
-                <TrendingUp className="h-6 w-6 text-green-600" />
+              <div className="rounded-xl bg-emerald-50 p-2.5">
+                <TrendingUp className="h-5 w-5 text-emerald-600" />
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">Total Revenue</p>
-                <p className="text-2xl font-bold">{formatCurrency(75000)}</p>
+                <p className="text-xs text-slate-500">Total Revenue</p>
+                <p className="text-2xl font-bold text-slate-900">{formatCurrency(75000)}</p>
               </div>
             </div>
           </CardContent>
         </Card>
-        <Card>
-          <CardContent className="p-6">
+        <Card className="border-slate-200 shadow-sm">
+          <CardContent className="p-5">
             <div className="flex items-center gap-4">
-              <div className="rounded-full bg-blue-100 p-3">
-                <ShoppingCart className="h-6 w-6 text-blue-600" />
+              <div className="rounded-xl bg-blue-50 p-2.5">
+                <ShoppingCart className="h-5 w-5 text-blue-600" />
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">Total Orders</p>
-                <p className="text-2xl font-bold">475</p>
+                <p className="text-xs text-slate-500">Total Orders</p>
+                <p className="text-2xl font-bold text-slate-900">475</p>
               </div>
             </div>
           </CardContent>
         </Card>
-        <Card>
-          <CardContent className="p-6">
+        <Card className="border-slate-200 shadow-sm">
+          <CardContent className="p-5">
             <div className="flex items-center gap-4">
-              <div className="rounded-full bg-purple-100 p-3">
-                <Package className="h-6 w-6 text-purple-600" />
+              <div className="rounded-xl bg-purple-50 p-2.5">
+                <Package className="h-5 w-5 text-purple-600" />
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">Products Sold</p>
-                <p className="text-2xl font-bold">1,250</p>
+                <p className="text-xs text-slate-500">Products Sold</p>
+                <p className="text-2xl font-bold text-slate-900">1,250</p>
               </div>
             </div>
           </CardContent>
         </Card>
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-2">
-        <Card>
-          <CardHeader>
-            <CardTitle>Monthly Sales</CardTitle>
+      <div className="grid gap-4 lg:grid-cols-2">
+        <Card className="border-slate-200 shadow-sm">
+          <CardHeader className="p-5 pb-4">
+            <CardTitle className="text-base font-semibold text-slate-900">Monthly Sales</CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="pt-0">
             <ResponsiveContainer width="100%" height={300}>
               <BarChart data={salesData}>
                 <CartesianGrid strokeDasharray="3 3" />
@@ -153,11 +153,11 @@ export default function Reports() {
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>Revenue vs Expenses</CardTitle>
+        <Card className="border-slate-200 shadow-sm">
+          <CardHeader className="p-5 pb-4">
+            <CardTitle className="text-base font-semibold text-slate-900">Revenue vs Expenses</CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="pt-0">
             <ResponsiveContainer width="100%" height={300}>
               <LineChart data={revenueData}>
                 <CartesianGrid strokeDasharray="3 3" />
@@ -185,23 +185,23 @@ export default function Reports() {
         </Card>
       </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Top Selling Products</CardTitle>
+      <Card className="border-slate-200 shadow-sm">
+        <CardHeader className="p-5 pb-4">
+          <CardTitle className="text-base font-semibold text-slate-900">Top Selling Products</CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className="pt-0">
           <div className="space-y-4">
             {topProducts.map((product, index) => (
               <div key={index}>
                 <div className="flex items-center justify-between mb-1">
-                  <span className="text-sm font-medium">{product.name}</span>
-                  <span className="text-sm text-muted-foreground">
+                  <span className="text-sm font-medium text-slate-900">{product.name}</span>
+                  <span className="text-sm text-slate-500">
                     {product.sold} units - {formatCurrency(product.revenue)}
                   </span>
                 </div>
-                <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
+                <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
                   <div
-                    className="h-full bg-green-500 rounded-full"
+                    className="h-full bg-emerald-500 rounded-full"
                     style={{ width: `${(product.sold / topProducts[0].sold) * 100}%` }}
                   />
                 </div>

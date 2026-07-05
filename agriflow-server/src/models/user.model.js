@@ -30,9 +30,10 @@ const userSchema = new mongoose.Schema(
     },
 
     tenantId: {
-      type: String,
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Tenant",
       required: true,
-      index: true, // 🚀 multi-tenant performance
+      index: true,
     },
 
     isActive: {
@@ -44,10 +45,10 @@ const userSchema = new mongoose.Schema(
 );
 
 
-userSchema.pre("save", async function (next) {
+userSchema.pre("save", async function () {
       // only hash if password is new or changed
 
-    if (!this.isModified("password")) return next();
+    if (!this.isModified("password")) return;
     const salt = await bcrypt.genSalt(10);
     this.password = await bcrypt.hash(this.password, salt);
     

@@ -22,7 +22,7 @@ export default function Dashboard() {
     queryFn: dashboardService.getStats,
   });
 
-  const stats = data?.data?.data || {};
+  const stats = data || {};
   const recentOrders = stats.recentOrders || [];
 
   return (
@@ -92,16 +92,16 @@ export default function Dashboard() {
               ) : (
                 recentOrders.map((order) => (
                   <TableRow key={order._id} className="border-slate-50 hover:bg-slate-50/50">
-                    <TableCell className="font-medium text-slate-900 pl-5">{order.orderNumber || order._id?.slice(-8)}</TableCell>
+                    <TableCell className="font-medium text-slate-900 pl-5">{order.orderNo || order._id?.slice(-8)}</TableCell>
                     <TableCell className="text-slate-600">{order.customerId?.name || "N/A"}</TableCell>
                     <TableCell className="text-slate-500">{format(new Date(order.createdAt), "MMM dd, yyyy")}</TableCell>
                     <TableCell>
                       <Badge variant="outline" className={
-                        order.status === "delivered" ? "text-emerald-700 bg-emerald-50 border-emerald-200"
-                        : order.status === "shipped" ? "text-blue-700 bg-blue-50 border-blue-200"
-                        : order.status === "confirmed" ? "text-purple-700 bg-purple-50 border-purple-200"
-                        : order.status === "pending" ? "text-amber-700 bg-amber-50 border-amber-200"
-                        : order.status === "cancelled" ? "text-red-700 bg-red-50 border-red-200"
+                        order.status === "DELIVERED" ? "text-emerald-700 bg-emerald-50 border-emerald-200"
+                        : order.status === "SHIPPED" ? "text-blue-700 bg-blue-50 border-blue-200"
+                        : order.status === "CONFIRMED" ? "text-purple-700 bg-purple-50 border-purple-200"
+                        : order.status === "PENDING" ? "text-amber-700 bg-amber-50 border-amber-200"
+                        : order.status === "CANCELLED" ? "text-red-700 bg-red-50 border-red-200"
                         : "text-slate-700 bg-slate-50 border-slate-200"
                       }>
                         {order.status}

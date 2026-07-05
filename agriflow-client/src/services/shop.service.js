@@ -14,8 +14,8 @@ const shopService = {
   getBestSellers: () => get(API.SHOP.BEST),
 
   getCart: () => get(API.CART),
-  addToCart: (productId, qty) => post(API.CART, { productId, qty }),
-  updateCart: (productId, qty) => put(`${API.CART}/${productId}`, { qty }),
+  addToCart: (productId, quantity) => post(API.CART, { productId, quantity }),
+  updateCart: (productId, quantity) => put(`${API.CART}/${productId}`, { quantity }),
   removeFromCart: (productId) => del(`${API.CART}/${productId}`),
   clearCart: () => del(API.CART),
 

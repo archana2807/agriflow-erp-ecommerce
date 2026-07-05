@@ -21,9 +21,9 @@ const PRODUCTS_PER_PAGE = 12;
 
 function ProductForm({ product, onSubmit, isLoading }) {
   const [form, setForm] = useState({
-    name: "", slug: "", description: "", price: "", sellingPrice: "",
-    categoryId: "", brandId: "", sku: "", stock: "", unit: "kg",
-    status: "active", isFeatured: false,
+    name: "", slug: "", description: "", price: "", sellingPrice: "", gstPercent: "",
+    category: "", brand: "", sku: "", stock: "", unit: "kg",
+    featured: false, bestSeller: false, newArrival: false,
   });
   const [images, setImages] = useState([]);
   const [uploadingImages, setUploadingImages] = useState(false);
@@ -31,22 +31,22 @@ function ProductForm({ product, onSubmit, isLoading }) {
 
   const { data: categoriesData } = useQuery({ queryKey: ["categories"], queryFn: categoryService.getAll });
   const { data: brandsData } = useQuery({ queryKey: ["brands"], queryFn: brandService.getAll });
-  const categories = categoriesData?.data?.data || [];
-  const brands = brandsData?.data?.data || [];
+  const categories = categoriesData?.categories || [];
+  const brands = brandsData?.brands || [];
 
   useEffect(() => {
     if (product) {
       setForm({
         name: product.name || "", slug: product.slug || "", description: product.description || "",
-        price: product.price || "", sellingPrice: product.sellingPrice || "",
-        categoryId: product.categoryId?._id || product.categoryId || product.category || "",
-        brandId: product.brandId?._id || product.brandId || product.brand || "",
+        price: product.price || "", sellingPrice: product.sellingPrice || "", gstPercent: product.gstPercent ?? "",
+        category: product.categoryId?._id || product.categoryId || product.category || "",
+        brand: product.brandId?._id || product.brandId || product.brand || "",
         sku: product.sku || "", stock: product.stock ?? "", unit: product.unit || "kg",
-        status: product.status || "active", isFeatured: product.isFeatured || false,
+        featured: product.featured || false, bestSeller: product.bestSeller || false, newArrival: product.newArrival || false,
       });
       setImages(product.images || []);
     } else {
-      setForm({ name: "", slug: "", description: "", price: "", sellingPrice: "", categoryId: "", brandId: "", sku: "", stock: "", unit: "kg", status: "active", isFeatured: false });
+      setForm({ name: "", slug: "", description: "", price: "", sellingPrice: "", gstPercent: "", category: "", brand: "", sku: "", stock: "", unit: "kg", featured: false, bestSeller: false, newArrival: false });
       setImages([]);
     }
   }, [product]);
@@ -76,8 +76,15 @@ function ProductForm({ product, onSubmit, isLoading }) {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (!form.name || !form.price) { toast.error("Name and price are required"); return; }
-    const payload = { ...form, images, price: Number(form.price), sellingPrice: form.sellingPrice ? Number(form.sellingPrice) : undefined, stock: form.stock ? Number(form.stock) : 0 };
+    if (!form.name || !form.price || !form.sku || form.gstPercent === "") { toast.error("Name, price, SKU, and GST % are required"); return; }
+    const payload = {
+      name: form.name, slug: form.slug, description: form.description,
+      price: Number(form.price), sellingPrice: form.sellingPrice ? Number(form.sellingPrice) : undefined,
+      gstPercent: Number(form.gstPercent), stock: form.stock ? Number(form.stock) : 0,
+      category: form.category || undefined, brand: form.brand || undefined,
+      sku: form.sku, unit: form.unit, images,
+      featured: form.featured, bestSeller: form.bestSeller, newArrival: form.newArrival,
+    };
     onSubmit(payload);
   };
 
@@ -105,30 +112,34 @@ function ProductForm({ product, onSubmit, isLoading }) {
           <Input type="number" value={form.price} onChange={(e) => setForm({ ...form, price: e.target.value })} placeholder="0.00" className="border-slate-200 focus-visible:ring-slate-400/20" />
         </div>
         <div className="space-y-1.5">
+          <Label className="text-sm font-medium text-slate-700">GST % *</Label>
+          <Input type="number" value={form.gstPercent} onChange={(e) => setForm({ ...form, gstPercent: e.target.value })} placeholder="0" min="0" max="28" className="border-slate-200 focus-visible:ring-slate-400/20" />
+        </div>
+        <div className="space-y-1.5">
           <Label className="text-sm font-medium text-slate-700">Selling Price</Label>
           <Input type="number" value={form.sellingPrice} onChange={(e) => setForm({ ...form, sellingPrice: e.target.value })} placeholder="0.00" className="border-slate-200 focus-visible:ring-slate-400/20" />
         </div>
         <div className="space-y-1.5">
-          <Label className="text-sm font-medium text-slate-700">SKU</Label>
+          <Label className="text-sm font-medium text-slate-700">SKU *</Label>
           <Input value={form.sku} onChange={(e) => setForm({ ...form, sku: e.target.value })} placeholder="SKU" className="border-slate-200 focus-visible:ring-slate-400/20" />
-        </div>
-        <div className="space-y-1.5">
-          <Label className="text-sm font-medium text-slate-700">Stock</Label>
-          <Input type="number" value={form.stock} onChange={(e) => setForm({ ...form, stock: e.target.value })} placeholder="0" className="border-slate-200 focus-visible:ring-slate-400/20" />
         </div>
       </div>
 
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
         <div className="space-y-1.5">
+          <Label className="text-sm font-medium text-slate-700">Stock</Label>
+          <Input type="number" value={form.stock} onChange={(e) => setForm({ ...form, stock: e.target.value })} placeholder="0" className="border-slate-200 focus-visible:ring-slate-400/20" />
+        </div>
+        <div className="space-y-1.5">
           <Label className="text-sm font-medium text-slate-700">Category</Label>
-          <Select value={form.categoryId} onValueChange={(v) => setForm({ ...form, categoryId: v })}>
+          <Select value={form.category} onValueChange={(v) => setForm({ ...form, category: v })}>
             <SelectTrigger className="border-slate-200 focus:ring-slate-400/20"><SelectValue placeholder="Select" /></SelectTrigger>
             <SelectContent>{categories.map((c) => <SelectItem key={c._id} value={c._id}>{c.name}</SelectItem>)}</SelectContent>
           </Select>
         </div>
         <div className="space-y-1.5">
           <Label className="text-sm font-medium text-slate-700">Brand</Label>
-          <Select value={form.brandId} onValueChange={(v) => setForm({ ...form, brandId: v })}>
+          <Select value={form.brand} onValueChange={(v) => setForm({ ...form, brand: v })}>
             <SelectTrigger className="border-slate-200 focus:ring-slate-400/20"><SelectValue placeholder="Select" /></SelectTrigger>
             <SelectContent>{brands.map((b) => <SelectItem key={b._id} value={b._id}>{b.name}</SelectItem>)}</SelectContent>
           </Select>
@@ -145,16 +156,21 @@ function ProductForm({ product, onSubmit, isLoading }) {
             </SelectContent>
           </Select>
         </div>
-        <div className="space-y-1.5">
-          <Label className="text-sm font-medium text-slate-700">Status</Label>
-          <Select value={form.status} onValueChange={(v) => setForm({ ...form, status: v })}>
-            <SelectTrigger className="border-slate-200 focus:ring-slate-400/20"><SelectValue /></SelectTrigger>
-            <SelectContent>
-              <SelectItem value="active">Active</SelectItem><SelectItem value="inactive">Inactive</SelectItem>
-              <SelectItem value="draft">Draft</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
+      </div>
+
+      <div className="flex flex-wrap gap-4">
+        <label className="flex items-center gap-2 text-sm text-slate-700 cursor-pointer">
+          <input type="checkbox" checked={form.featured} onChange={(e) => setForm({ ...form, featured: e.target.checked })} className="rounded border-slate-300" />
+          Featured
+        </label>
+        <label className="flex items-center gap-2 text-sm text-slate-700 cursor-pointer">
+          <input type="checkbox" checked={form.bestSeller} onChange={(e) => setForm({ ...form, bestSeller: e.target.checked })} className="rounded border-slate-300" />
+          Best Seller
+        </label>
+        <label className="flex items-center gap-2 text-sm text-slate-700 cursor-pointer">
+          <input type="checkbox" checked={form.newArrival} onChange={(e) => setForm({ ...form, newArrival: e.target.checked })} className="rounded border-slate-300" />
+          New Arrival
+        </label>
       </div>
 
       <div className="space-y-1.5">
@@ -208,16 +224,16 @@ export default function Products() {
 
   const { data: categoriesData } = useQuery({ queryKey: ["categories"], queryFn: categoryService.getAll });
   const { data: brandsData } = useQuery({ queryKey: ["brands"], queryFn: brandService.getAll });
-  const categories = categoriesData?.data?.data || [];
-  const brands = brandsData?.data?.data || [];
+  const categories = categoriesData?.categories || [];
+  const brands = brandsData?.brands || [];
 
-  const createMutation = useMutation({ mutationFn: (data) => productService.create(data), onSuccess: () => { queryClient.invalidateQueries(["admin-products"]); toast.success("Product created"); setShowCreateDialog(false); }, onError: (e) => toast.error(e.response?.data?.message || "Failed") });
-  const updateMutation = useMutation({ mutationFn: ({ id, data }) => productService.update(id, data), onSuccess: () => { queryClient.invalidateQueries(["admin-products"]); toast.success("Product updated"); setEditingProduct(null); }, onError: (e) => toast.error(e.response?.data?.message || "Failed") });
-  const deleteMutation = useMutation({ mutationFn: (id) => productService.delete(id), onSuccess: () => { queryClient.invalidateQueries(["admin-products"]); toast.success("Product deleted"); setDeletingProduct(null); }, onError: (e) => toast.error(e.response?.data?.message || "Failed") });
+  const createMutation = useMutation({ mutationFn: (data) => productService.create(data), onSuccess: () => { queryClient.invalidateQueries(["admin-products"]); toast.success("Product created"); setShowCreateDialog(false); }, onError: (e) => toast.error(e.message || "Failed") });
+  const updateMutation = useMutation({ mutationFn: ({ id, data }) => productService.update(id, data), onSuccess: () => { queryClient.invalidateQueries(["admin-products"]); toast.success("Product updated"); setEditingProduct(null); }, onError: (e) => toast.error(e.message || "Failed") });
+  const deleteMutation = useMutation({ mutationFn: (id) => productService.delete(id), onSuccess: () => { queryClient.invalidateQueries(["admin-products"]); toast.success("Product deleted"); setDeletingProduct(null); }, onError: (e) => toast.error(e.message || "Failed") });
 
-  const products = data?.data?.data || [];
-  const totalPages = data?.data?.totalPages || 1;
-  const totalCount = data?.data?.totalCount || 0;
+  const products = data?.products || [];
+  const totalPages = data?.totalPages || 1;
+  const totalCount = data?.totalCount || 0;
 
   return (
     <div className="space-y-6">
@@ -320,10 +336,9 @@ export default function Products() {
                     </TableCell>
                     <TableCell>
                       <Badge variant="outline" className={
-                        product.status === "active" ? "text-emerald-700 bg-emerald-50 border-emerald-200"
-                        : product.status === "draft" ? "text-amber-700 bg-amber-50 border-amber-200"
+                        product.isActive ? "text-emerald-700 bg-emerald-50 border-emerald-200"
                         : "text-slate-600 bg-slate-50 border-slate-200"
-                      }>{product.status}</Badge>
+                      }>{product.isActive ? "Active" : "Inactive"}</Badge>
                     </TableCell>
                     <TableCell className="text-right pr-5">
                       <div className="flex items-center justify-end gap-1">

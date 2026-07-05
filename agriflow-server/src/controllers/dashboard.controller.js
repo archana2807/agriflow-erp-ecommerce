@@ -42,6 +42,11 @@ export const getDashboardStats = async (req, res, next) => {
       status: { $ne: "PAID" },
     });
 
+    const recentOrders = await Order.find({ tenantId })
+      .populate("customerId", "name email phone")
+      .sort({ createdAt: -1 })
+      .limit(5);
+
     res.status(200).json({
       success: true,
       totalOrders,
@@ -50,6 +55,7 @@ export const getDashboardStats = async (req, res, next) => {
       totalProducts,
       totalRevenue,
       pendingInvoices,
+      recentOrders,
     });
   } catch (error) {
     next(error);

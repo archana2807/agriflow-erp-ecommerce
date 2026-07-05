@@ -34,7 +34,8 @@ const productSchema = new mongoose.Schema(
     },
 
     tenantId: {
-      type: String,
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Tenant",
       required: true,
       index: true,
     },

@@ -33,9 +33,14 @@ export class CheckoutService {
         tenantId,
         customerId,
         items,
-        createdBy: customerId,
+        createdBy: null,
         session,
       });
+
+      order.paymentMethod = paymentMethod === "COD" ? "CASH" : paymentMethod === "RAZORPAY" ? "RAZORPAY" : "CARD";
+      if (paymentMethod === "COD") {
+        order.status = "CONFIRMED";
+      }
 
       if (addressId) {
         order.addressId = addressId;
@@ -47,7 +52,7 @@ export class CheckoutService {
         order,
         orderItems,
         totalAmount: cart.grandTotal,
-        createdBy: customerId,
+        createdBy: null,
         session,
       });
 
@@ -56,25 +61,39 @@ export class CheckoutService {
         invoice,
         amountPaid: 0,
         paymentMethod,
-        createdBy: customerId,
+        createdBy: null,
         session,
       });
 
+      if (paymentMethod !== "RAZORPAY") {
+        cart.items = [];
+        cart.subtotal = 0;
+        cart.gstAmount = 0;
+        cart.discount = 0;
+        cart.grandTotal = 0;
+        await cart.save({ session });
+      }
+
+      await session.commitTransaction();
+      session.endSession();
+
+      return { order, invoice, cart };
+    } catch (error) {
+      await session.abortTransaction();
+      session.endSession();
+      throw error;
+    }
+  }
+
+  static async clearCartAfterPayment(customerId, tenantId) {
+    const cart = await Cart.findOne({ customerId, tenantId });
+    if (cart) {
       cart.items = [];
       cart.subtotal = 0;
       cart.gstAmount = 0;
       cart.discount = 0;
       cart.grandTotal = 0;
-      await cart.save({ session });
-
-      await session.commitTransaction();
-      session.endSession();
-
-      return { order, invoice };
-    } catch (error) {
-      await session.abortTransaction();
-      session.endSession();
-      throw error;
+      await cart.save();
     }
   }
 }

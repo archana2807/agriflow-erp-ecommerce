@@ -15,7 +15,8 @@ function slugify(text) {
 const brandSchema = new mongoose.Schema(
   {
     tenantId: {
-      type: String,
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Tenant",
       required: true,
       index: true,
     },
@@ -52,11 +53,10 @@ const brandSchema = new mongoose.Schema(
 brandSchema.index({ tenantId: 1, name: 1 }, { unique: true });
 brandSchema.index({ tenantId: 1, slug: 1 }, { sparse: true });
 
-brandSchema.pre("save", function (next) {
+brandSchema.pre("save", function () {
   if (this.isModified("name") && !this.slug) {
     this.slug = slugify(this.name);
   }
-  next();
 });
 
 export default mongoose.model("Brand", brandSchema);

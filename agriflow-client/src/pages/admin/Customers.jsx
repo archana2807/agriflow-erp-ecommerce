@@ -2,16 +2,17 @@ import { useState } from "react";
 import {
   Plus,
   Search,
-  MoreHorizontal,
   Pencil,
   Trash2,
   Loader2,
   UserCheck,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import {
   Dialog,
@@ -29,20 +30,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import {
-  Pagination,
-  PaginationContent,
-  PaginationItem,
-  PaginationLink,
-  PaginationNext,
-  PaginationPrevious,
-} from "@/components/ui/pagination";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -156,35 +143,36 @@ export default function Customers() {
   };
 
   return (
-    <div className="erp-page">
-      <div className="erp-page-header">
+    <div className="space-y-6">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="erp-page-title">Customers</h1>
-          <p className="erp-page-subtitle">Manage walk-in and registered customers</p>
+          <h2 className="text-2xl font-bold tracking-tight text-slate-900">Customers</h2>
+          <p className="text-sm text-slate-500 mt-1">Manage walk-in and registered customers</p>
         </div>
-        <Button onClick={() => openDialog()}>
+        <Button onClick={() => openDialog()} className="bg-slate-900 hover:bg-slate-800 text-white shadow-sm rounded-lg">
           <Plus className="mr-2 h-4 w-4" />
           Add Customer
         </Button>
       </div>
 
-      <Card>
-        <CardHeader>
-          <div className="flex items-center gap-4">
-            <div className="relative flex-1 max-w-sm">
-              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-              <Input
-                placeholder="Search customers..."
-                value={search}
-                onChange={handleSearch}
-                className="pl-9"
-              />
-            </div>
+      <Card className="border-slate-200 shadow-sm">
+        <CardContent className="p-5">
+          <div className="relative flex-1 max-w-sm">
+            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+            <Input
+              placeholder="Search customers..."
+              value={search}
+              onChange={handleSearch}
+              className="pl-9 border-slate-200 focus-visible:ring-slate-400/20"
+            />
           </div>
-        </CardHeader>
-        <CardContent>
+        </CardContent>
+      </Card>
+
+      <Card className="border-slate-200 shadow-sm">
+        <CardContent className="p-0">
           {isLoading ? (
-            <div className="space-y-3">
+            <div className="p-5 space-y-3">
               {Array.from({ length: 5 }).map((_, i) => (
                 <Skeleton key={i} className="h-12 w-full" />
               ))}
@@ -193,60 +181,48 @@ export default function Customers() {
             <>
               <Table>
                 <TableHeader>
-                  <TableRow>
-                    <TableHead>Name</TableHead>
-                    <TableHead>Phone</TableHead>
-                    <TableHead>Type</TableHead>
-                    <TableHead>Created</TableHead>
-                    <TableHead className="text-right">Actions</TableHead>
+                  <TableRow className="border-slate-100 hover:bg-transparent">
+                    <TableHead className="font-semibold text-slate-600 pl-5">Name</TableHead>
+                    <TableHead className="font-semibold text-slate-600">Phone</TableHead>
+                    <TableHead className="font-semibold text-slate-600">Type</TableHead>
+                    <TableHead className="font-semibold text-slate-600">Created</TableHead>
+                    <TableHead className="font-semibold text-slate-600 text-right pr-5">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {customers.length === 0 ? (
                     <TableRow>
-                      <TableCell colSpan={5} className="text-center py-8 text-muted-foreground">
+                      <TableCell colSpan={5} className="text-center py-12 text-slate-500">
                         No customers found
                       </TableCell>
                     </TableRow>
                   ) : (
                     customers.map((customer) => (
-                      <TableRow key={customer._id}>
-                        <TableCell className="font-medium">{customer.name}</TableCell>
-                        <TableCell>{customer.phone || "-"}</TableCell>
+                      <TableRow key={customer._id} className="border-slate-50 hover:bg-slate-50/50">
+                        <TableCell className="font-medium text-slate-900 text-sm pl-5">{customer.name}</TableCell>
+                        <TableCell className="text-slate-600 text-sm">{customer.phone || "-"}</TableCell>
                         <TableCell>
                           {customer.isWalkIn ? (
-                            <Badge variant="outline" className="text-orange-600 border-orange-300">
+                            <Badge variant="outline" className="text-orange-700 bg-orange-50 border-orange-200">
                               <UserCheck className="mr-1 h-3 w-3" />
                               Walk-In
                             </Badge>
                           ) : (
-                            <Badge variant="outline" className="text-green-600 border-green-300">
+                            <Badge variant="outline" className="text-emerald-700 bg-emerald-50 border-emerald-200">
                               Registered
                             </Badge>
                           )}
                         </TableCell>
-                        <TableCell>{formatDate(customer.createdAt)}</TableCell>
-                        <TableCell className="text-right">
-                          <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                              <Button variant="ghost" size="icon">
-                                <MoreHorizontal className="h-4 w-4" />
-                              </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end">
-                              <DropdownMenuItem onClick={() => openDialog(customer)}>
-                                <Pencil className="mr-2 h-4 w-4" />
-                                Edit
-                              </DropdownMenuItem>
-                              <DropdownMenuItem
-                                onClick={() => openDeleteDialog(customer)}
-                                className="text-red-600"
-                              >
-                                <Trash2 className="mr-2 h-4 w-4" />
-                                Delete
-                              </DropdownMenuItem>
-                            </DropdownMenuContent>
-                          </DropdownMenu>
+                        <TableCell className="text-slate-500 text-sm">{formatDate(customer.createdAt)}</TableCell>
+                        <TableCell className="text-right pr-5">
+                          <div className="flex items-center justify-end gap-1">
+                            <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-500 hover:text-slate-700 hover:bg-slate-100" onClick={() => openDialog(customer)}>
+                              <Pencil className="h-4 w-4" />
+                            </Button>
+                            <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-500 hover:text-red-600 hover:bg-red-50" onClick={() => openDeleteDialog(customer)}>
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </div>
                         </TableCell>
                       </TableRow>
                     ))
@@ -255,33 +231,28 @@ export default function Customers() {
               </Table>
 
               {totalPages > 1 && (
-                <div className="mt-4 flex justify-center">
-                  <Pagination>
-                    <PaginationContent>
-                      <PaginationItem>
-                        <PaginationPrevious
-                          onClick={() => setPage((p) => Math.max(1, p - 1))}
-                          disabled={page === 1}
-                        />
-                      </PaginationItem>
-                      {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
-                        <PaginationItem key={p}>
-                          <PaginationLink
-                            onClick={() => setPage(p)}
-                            isActive={p === page}
-                          >
-                            {p}
-                          </PaginationLink>
-                        </PaginationItem>
-                      ))}
-                      <PaginationItem>
-                        <PaginationNext
-                          onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-                          disabled={page === totalPages}
-                        />
-                      </PaginationItem>
-                    </PaginationContent>
-                  </Pagination>
+                <div className="flex items-center justify-between p-5">
+                  <p className="text-sm text-slate-500">Page {page} of {totalPages}</p>
+                  <div className="flex items-center gap-1.5">
+                    <Button variant="outline" size="icon" className="h-8 w-8 border-slate-200" onClick={() => setPage((p) => Math.max(1, p - 1))} disabled={page === 1}>
+                      <ChevronLeft className="h-4 w-4" />
+                    </Button>
+                    {Array.from({ length: Math.min(5, totalPages) }).map((_, i) => {
+                      let pg;
+                      if (totalPages <= 5) pg = i + 1;
+                      else if (page <= 3) pg = i + 1;
+                      else if (page >= totalPages - 2) pg = totalPages - 4 + i;
+                      else pg = page - 2 + i;
+                      return (
+                        <Button key={pg} variant={page === pg ? "default" : "outline"} size="icon" className={`h-8 w-8 ${page === pg ? "bg-slate-900 text-white hover:bg-slate-800" : "border-slate-200 text-slate-600 hover:bg-slate-50"}`} onClick={() => setPage(pg)}>
+                          {pg}
+                        </Button>
+                      );
+                    })}
+                    <Button variant="outline" size="icon" className="h-8 w-8 border-slate-200" onClick={() => setPage((p) => Math.min(totalPages, p + 1))} disabled={page === totalPages}>
+                      <ChevronRight className="h-4 w-4" />
+                    </Button>
+                  </div>
                 </div>
               )}
             </>
@@ -290,24 +261,24 @@ export default function Customers() {
       </Card>
 
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>{selectedCustomer ? "Edit Customer" : "Add Customer"}</DialogTitle>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto border-slate-200">
+          <DialogHeader className="pb-4 border-b border-slate-100">
+            <DialogTitle className="text-lg font-semibold text-slate-900">{selectedCustomer ? "Edit Customer" : "Add Customer"}</DialogTitle>
             <DialogDescription>
               {selectedCustomer ? "Update customer details" : "Register a new customer or walk-in"}
             </DialogDescription>
           </DialogHeader>
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="name">Name <span className="text-destructive">*</span></Label>
-              <Input id="name" {...register("name")} placeholder="Enter name" />
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 pt-2">
+            <div className="space-y-1.5">
+              <Label className="text-sm font-medium text-slate-700">Name <span className="text-destructive">*</span></Label>
+              <Input id="name" {...register("name")} placeholder="Enter name" className="border-slate-200 focus-visible:ring-slate-400/20" />
               {errors.name && (
                 <p className="text-sm text-red-500">{errors.name.message}</p>
               )}
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="phone">Phone</Label>
-              <Input id="phone" {...register("phone")} placeholder="Enter phone number" />
+            <div className="space-y-1.5">
+              <Label className="text-sm font-medium text-slate-700">Phone</Label>
+              <Input id="phone" {...register("phone")} placeholder="Enter phone number" className="border-slate-200 focus-visible:ring-slate-400/20" />
               {errors.phone && (
                 <p className="text-sm text-red-500">{errors.phone.message}</p>
               )}
@@ -318,22 +289,22 @@ export default function Customers() {
                 id="isWalkIn"
                 checked={isWalkIn}
                 onChange={(e) => setValue("isWalkIn", e.target.checked)}
-                className="h-4 w-4 rounded border-gray-300"
+                className="h-4 w-4 rounded border-slate-300"
               />
-              <Label htmlFor="isWalkIn" className="cursor-pointer">
+              <Label htmlFor="isWalkIn" className="cursor-pointer text-sm text-slate-700">
                 Walk-in Customer (no account needed)
               </Label>
             </div>
             {isWalkIn && (
-              <p className="text-xs text-muted-foreground bg-orange-50 p-2 rounded">
+              <p className="text-xs text-amber-700 bg-amber-50 border border-amber-200 p-2.5 rounded-lg">
                 A placeholder account will be created. The customer can still place orders through the counter.
               </p>
             )}
-            <DialogFooter>
-              <Button type="button" variant="outline" onClick={() => setDialogOpen(false)}>
+            <DialogFooter className="pt-2">
+              <Button type="button" variant="outline" onClick={() => setDialogOpen(false)} className="border-slate-200">
                 Cancel
               </Button>
-              <Button type="submit" disabled={isMutating}>
+              <Button type="submit" disabled={isMutating} className="bg-slate-900 hover:bg-slate-800 text-white">
                 {isMutating && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 {selectedCustomer ? "Update" : "Create"}
               </Button>
@@ -343,15 +314,13 @@ export default function Customers() {
       </Dialog>
 
       <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
-        <DialogContent>
+        <DialogContent className="max-w-md border-slate-200">
           <DialogHeader>
-            <DialogTitle>Delete Customer</DialogTitle>
-            <DialogDescription>
-              Are you sure you want to delete {selectedCustomer?.name}? This action cannot be undone.
-            </DialogDescription>
+            <DialogTitle className="text-lg font-semibold text-slate-900">Delete Customer</DialogTitle>
           </DialogHeader>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setDeleteDialogOpen(false)}>
+          <p className="text-sm text-slate-500">Are you sure you want to delete <strong className="text-slate-900">{selectedCustomer?.name}</strong>? This action cannot be undone.</p>
+          <DialogFooter className="pt-4">
+            <Button variant="outline" onClick={() => setDeleteDialogOpen(false)} className="border-slate-200">
               Cancel
             </Button>
             <Button variant="destructive" onClick={handleDelete} disabled={isMutating}>

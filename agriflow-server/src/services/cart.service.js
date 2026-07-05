@@ -22,57 +22,44 @@ export class CartService {
   }
 
   static async addItem(customerId, tenantId, productId, quantity = 1) {
-    const product = await Product.findOne({
-      _id: productId,
-      tenantId,
-      isDeleted: false,
-      isActive: true,
+  const product = await Product.findOne({
+    _id: productId,
+    isDeleted: false,
+    isActive: true,
+  });
+
+  if (!product) throw new Error("Product not found");
+  if (product.stock < quantity) throw new Error("Insufficient stock");
+
+  let cart = await Cart.findOne({ customerId, tenantId });
+  if (!cart) cart = new Cart({ customerId, tenantId, items: [] });
+
+  const index = cart.items.findIndex(
+    (item) => item.productId.toString() === productId.toString()
+  );
+
+  const price = product.price;
+
+  if (index > -1) {
+    cart.items[index].quantity += quantity;
+    cart.items[index].total = cart.items[index].quantity * price;
+  } else {
+    cart.items.push({
+      productId,
+      quantity,
+      price,
+      total: price * quantity,
     });
-
-    if (!product) {
-      throw new Error("Product not found");
-    }
-
-    if (product.stock < quantity) {
-      throw new Error("Insufficient stock");
-    }
-
-    let cart = await Cart.findOne({ customerId, tenantId });
-
-    if (!cart) {
-      cart = new Cart({
-        customerId,
-        tenantId,
-        items: [],
-      });
-    }
-
-    const existingItemIndex = cart.items.findIndex(
-      (item) => item.productId.toString() === productId
-    );
-
-    if (existingItemIndex > -1) {
-      cart.items[existingItemIndex].quantity += quantity;
-      cart.items[existingItemIndex].total =
-        cart.items[existingItemIndex].quantity * cart.items[existingItemIndex].price;
-    } else {
-      const price = product.sellingPrice || product.price;
-      cart.items.push({
-        productId,
-        quantity,
-        price,
-        total: price * quantity,
-      });
-    }
-
-    await CartService.calculateCartTotals(cart);
-    await cart.save();
-
-    return Cart.findById(cart._id).populate(
-      "items.productId",
-      "name slug images sellingPrice stock gstPercent"
-    );
   }
+
+  await CartService.calculateCartTotals(cart);
+  await cart.save();
+
+  return Cart.findById(cart._id).populate(
+    "items.productId",
+    "name slug images price stock gstPercent"
+  );
+}
 
   static async updateItem(customerId, tenantId, productId, quantity) {
     if (quantity < 1) {
@@ -166,20 +153,18 @@ export class CartService {
   }
 
   static async calculateCartTotals(cart) {
-    let subtotal = 0;
-    let gstAmount = 0;
+  let subtotal = 0;
+  let gstAmount = 0;
 
-    for (const item of cart.items) {
-      const product = await Product.findById(item.productId);
-      if (product) {
-        const itemSubtotal = item.total;
-        subtotal += itemSubtotal;
-        gstAmount += (itemSubtotal * (product.gstPercent || 0)) / 100;
-      }
-    }
-
-    cart.subtotal = subtotal;
-    cart.gstAmount = gstAmount;
-    cart.grandTotal = subtotal + gstAmount - cart.discount;
+  for (const item of cart.items) {
+    const product = await Product.findById(item.productId).select("gstPercent");
+    const itemSubtotal = item.total;
+    subtotal += itemSubtotal;
+    gstAmount += (itemSubtotal * (product?.gstPercent || 0)) / 100;
   }
+
+  cart.subtotal = subtotal;
+  cart.gstAmount = gstAmount;
+  cart.grandTotal = subtotal + gstAmount - cart.discount;
+}
 }

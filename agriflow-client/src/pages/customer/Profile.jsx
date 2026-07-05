@@ -160,7 +160,7 @@ export default function Profile() {
                     <label>Email</label>
                     <div className="input-wrap">
                       <Mail className="input-icon" />
-                      <input type="email" autoComplete="email" {...profileForm.register("email")} />
+                      <input type="email" autoComplete="email" value={user?.email || ""} readOnly className="bg-gray-50 cursor-not-allowed" />
                     </div>
                     {profileForm.formState.errors.email && <span className="form-error">{profileForm.formState.errors.email.message}</span>}
                   </div>

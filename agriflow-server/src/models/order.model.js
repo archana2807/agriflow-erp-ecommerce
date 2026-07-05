@@ -3,7 +3,8 @@ import mongoose from "mongoose";
 const orderSchema = new mongoose.Schema(
   {
     tenantId: {
-      type: String,
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Tenant",
       required: true,
       index: true,
     },
@@ -65,7 +66,7 @@ const orderSchema = new mongoose.Schema(
 
     paymentMethod: {
       type: String,
-      enum: ["CASH", "CARD", "UPI", "BANK_TRANSFER", "NONE"],
+      enum: ["CASH", "CARD", "UPI", "BANK_TRANSFER", "RAZORPAY", "NONE"],
       default: "NONE",
     },
 
@@ -73,6 +74,16 @@ const orderSchema = new mongoose.Schema(
       type: String,
       enum: ["UNPAID", "PARTIAL", "PAID"],
       default: "UNPAID",
+    },
+
+    razorpayOrderId: {
+      type: String,
+      default: null,
+    },
+
+    paymentId: {
+      type: String,
+      default: null,
     },
 
     createdBy: {

@@ -1,5 +1,4 @@
-import { Link } from "react-router-dom";
-import { Phone, Mail, MapPin, Clock, MessageCircle, Send, ArrowRight, Headphones, Truck, Shield } from "lucide-react";
+import { Phone, MapPin, Clock, MessageCircle, Send, Headphones, Truck, Shield } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 
@@ -33,9 +32,6 @@ export default function Contact() {
 
       <div className="contact-grid">
         <div className="contact-info-col">
-          <h2>Get in Touch</h2>
-          <p className="contact-subtitle">Have questions about our products or need a custom quote? We're here to help.</p>
-
           <div className="contact-cards">
             <div className="contact-card">
               <div className="contact-card-icon green">

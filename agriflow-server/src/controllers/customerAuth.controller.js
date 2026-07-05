@@ -1,3 +1,4 @@
+import mongoose from "mongoose";
 import Customer from "../models/customer.model.js";
 import { generateCustomerToken, setCustomerTokenCookie, clearCustomerTokenCookie } from "../utils/generateCustomerToken.js";
 
@@ -8,7 +9,9 @@ export const registerCustomer = async (req, res, next) => {
   try {
     const { name, email, password, phone } = req.validatedBody;
 
-    const tenantId = req.query.tenantId || "default";
+    const tenantId = req.query.tenantId
+      ? new mongoose.Types.ObjectId(req.query.tenantId)
+      : new mongoose.Types.ObjectId("6a2da032a1988ba7bb7e9820");
 
     const existingCustomer = await Customer.findOne({
       email,
@@ -57,7 +60,9 @@ export const loginCustomer = async (req, res, next) => {
   try {
     const { email, password } = req.validatedBody;
 
-    const tenantId = req.query.tenantId || "default";
+    const tenantId = req.query.tenantId
+      ? new mongoose.Types.ObjectId(req.query.tenantId)
+      : new mongoose.Types.ObjectId("6a2da032a1988ba7bb7e9820");
 
     const customer = await Customer.findOne({
       email,

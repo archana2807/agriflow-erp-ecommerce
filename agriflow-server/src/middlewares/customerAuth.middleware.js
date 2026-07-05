@@ -1,4 +1,5 @@
 import jwt from "jsonwebtoken";
+import mongoose from "mongoose";
 import Customer from "../models/customer.model.js";
 
 const JWT_SECRET = process.env.JWT_SECRET || "agriflow_jwt_secret_2026";
@@ -8,6 +9,8 @@ const JWT_SECRET = process.env.JWT_SECRET || "agriflow_jwt_secret_2026";
  */
 export const protectCustomer = async (req, res, next) => {
   try {
+
+    
     let token;
 
     // 1. Try to get token from httpOnly cookie
@@ -50,7 +53,7 @@ export const protectCustomer = async (req, res, next) => {
       name: customer.name,
       email: customer.email,
       phone: customer.phone,
-      tenantId: customer.tenantId,
+      tenantId: customer.tenantId instanceof mongoose.Types.ObjectId ? customer.tenantId : new mongoose.Types.ObjectId(String(customer.tenantId)),
     };
 
     next();
@@ -103,7 +106,7 @@ export const optionalCustomerAuth = async (req, res, next) => {
         name: customer.name,
         email: customer.email,
         phone: customer.phone,
-        tenantId: customer.tenantId,
+        tenantId: customer.tenantId instanceof mongoose.Types.ObjectId ? customer.tenantId : new mongoose.Types.ObjectId(String(customer.tenantId)),
       };
     } else {
       req.customer = null;

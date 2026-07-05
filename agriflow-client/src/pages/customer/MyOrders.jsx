@@ -59,7 +59,7 @@ export default function MyOrders() {
         </div>
       </div>
 
-      <div style={{ paddingTop: "24px" }}>
+      <div className="pt-6">
         {loading ? (
           <div className="orders-list">
             {Array.from({ length: 3 }).map((_, i) => <OrderSkeleton key={i} />)}
@@ -86,7 +86,7 @@ export default function MyOrders() {
                     <div className="order-card-top">
                       <div className="order-card-id">
                         <Hash className="h-4 w-4" />
-                        <span>{order.orderNumber || order._id?.slice(-8).toUpperCase()}</span>
+                        <span>{order.orderNo || order._id?.slice(-8).toUpperCase()}</span>
                       </div>
                       <span className={`order-status ${status.color}`}>
                         <status.icon className="h-3 w-3" />
@@ -163,7 +163,7 @@ export default function MyOrders() {
               <div className="modal-body">
                 <div className="modal-detail-row">
                   <span>Order ID</span>
-                  <span>#{selectedOrder.orderNumber || selectedOrder._id?.slice(-8).toUpperCase()}</span>
+                  <span>#{selectedOrder.orderNo || selectedOrder._id?.slice(-8).toUpperCase()}</span>
                 </div>
                 <div className="modal-detail-row">
                   <span>Date</span>
@@ -184,15 +184,15 @@ export default function MyOrders() {
                 <div className="modal-divider"></div>
                 <div className="modal-items">
                   {(selectedOrder.items || []).map((item) => {
-                    const product = item.product || item;
+                    const product = item.productId || item.product || {};
                     return (
-                      <div key={item._id || product._id} className="modal-item">
+                      <div key={product._id || item._id} className="modal-item">
                         <img src={product.images?.[0] || "/placeholder.png"} alt={product.name} />
                         <div className="modal-item-info">
                           <span className="modal-item-name">{product.name}</span>
-                          <span className="modal-item-qty">Qty: {item.qty}</span>
+                          <span className="modal-item-qty">Qty: {item.quantity}</span>
                         </div>
-                        <span className="modal-item-price">{formatCurrency((product.price || 0) * item.qty)}</span>
+                        <span className="modal-item-price">{formatCurrency((item.price || 0) * item.quantity)}</span>
                       </div>
                     );
                   })}

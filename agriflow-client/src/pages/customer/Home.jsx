@@ -1,10 +1,8 @@
-import { useState, useEffect, useRef } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import { ChevronRight, ChevronLeft, Phone, Star, Shield, Truck, Headphones, RotateCcw, ArrowRight, Sparkles, CheckCircle2 } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
+import { ChevronRight, ChevronLeft, Phone, Star, Shield, Truck, Headphones, RotateCcw, ArrowRight, Sparkles } from "lucide-react";
 import { formatCurrency } from "@/lib/utils";
-import { useShopProducts, useShopCategories, useBestSellers, useNewArrivals, useAddToCart } from "@/hooks/useQueries";
-import { useCustomerAuth } from "@/contexts/CustomerAuthContext";
-import { toast } from "sonner";
+import { useShopProducts, useShopCategories, useBestSellers, useNewArrivals } from "@/hooks/useQueries";
 
 const categoryIcons = {
   "tractor-parts": "fa-solid fa-wrench",
@@ -18,17 +16,18 @@ const categoryIcons = {
 };
 const fallbackIcon = "fa-solid fa-box";
 
+const heroSlides = [
+  { bg: "linear-gradient(135deg, #16a34a 0%, #22c55e 50%, #16a34a 100%)", badge: "Monsoon Sale", title: "Up to 20% OFF", sub: "On all cultivators, ploughs & tillers", cta: "Shop Cultivators", link: "/shop?category=cultivator", emoji: "tractor" },
+];
+
 /* ── Hero Banner ────────────────────────────────── */
 function HeroBanner() {
   const [cur, setCur] = useState(0);
   useEffect(() => {
-    const t = setInterval(() => setCur((p) => (p + 1) % 3), 5000);
+    const t = setInterval(() => setCur((p) => (p + 1) % heroSlides.length), 5000);
     return () => clearInterval(t);
   }, []);
-  const slides = [
-    { bg: "linear-gradient(135deg, #16a34a 0%, #22c55e 50%, #16a34a 100%)", badge: "Monsoon Sale", title: "Up to 20% OFF", sub: "On all cultivators, ploughs & tillers", cta: "Shop Cultivators", link: "/shop?category=cultivator", emoji: "tractor" },
-  ]
-  const s = slides[cur];
+  const s = heroSlides[cur];
   return (
     <div className="hero-banner" style={{ background: s.bg }}>
       <div className="hero-bg-pattern"></div>
@@ -50,7 +49,7 @@ function HeroBanner() {
         </div>
       </div>
       <div className="hero-dots">
-        {slides.map((_, i) => (
+        {heroSlides.map((_, i) => (
           <button key={i} onClick={() => setCur(i)} className={`hero-dot ${ i === cur ? "active" : "" }`} />
         ))}
       </div>
@@ -306,9 +305,6 @@ function StatsBar() {
 
 /* ── Main Home ──────────────────────────────────── */
 export default function Home() {
-  const navigate = useNavigate();
-  const { isAuthenticated } = useCustomerAuth();
-  const addToCart = useAddToCart();
   const { data: bestSellersData, isLoading: loadingBest } = useBestSellers();
   const { data: newArrivalsData, isLoading: loadingNew } = useNewArrivals();
   const { data: allProductsData, isLoading: loadingAll } = useShopProducts({ limit: 20 });
@@ -316,18 +312,6 @@ export default function Home() {
   const bestSellers = bestSellersData?.products || [];
   const newArrivals = newArrivalsData?.products || [];
   const allProducts = allProductsData?.products || [];
-
-  const handleAddToCart = (productId) => {
-    if (!isAuthenticated) {
-      toast.error("Please login to add items to cart");
-      navigate("/customer/login");
-      return;
-    }
-    addToCart.mutate({ productId, qty: 1 }, {
-      onSuccess: () => toast.success("Added to cart"),
-      onError: (err) => toast.error(err.message || "Failed to add to cart"),
-    });
-  };
 
   return (
     <div className="home-page">

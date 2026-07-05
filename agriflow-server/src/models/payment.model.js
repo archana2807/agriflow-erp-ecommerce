@@ -3,7 +3,8 @@ import mongoose from "mongoose";
 const paymentSchema = new mongoose.Schema(
   {
     tenantId: {
-      type: String,
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Tenant",
       required: true,
       index: true,
     },
@@ -27,7 +28,7 @@ const paymentSchema = new mongoose.Schema(
 
     paymentMethod: {
       type: String,
-      enum: ["CASH", "CARD", "UPI", "BANK_TRANSFER"],
+      enum: ["CASH", "CARD", "UPI", "BANK_TRANSFER", "RAZORPAY", "COD"],
       default: "CASH",
     },
 

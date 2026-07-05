@@ -23,7 +23,7 @@ export const createCustomer = async (req, res, next) => {
       name,
       phone,
       tenantId: req.tenantId,
-      createdBy: req.user.user,
+      createdBy: req.user.id,
       isWalkIn: isWalkIn || false,
     };
 

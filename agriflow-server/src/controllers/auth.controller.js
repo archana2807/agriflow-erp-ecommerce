@@ -1,3 +1,4 @@
+import mongoose from "mongoose";
 import User from "../models/user.model.js";
 import generateToken, { setTokenCookie } from "../utils/generateToken.js";
 
@@ -8,7 +9,7 @@ export const registerUser = async (req, res, next) => {
   try {
     const { name, email, password } = req.validatedBody;
 
-    const tenantId = "default";
+    const tenantId = new mongoose.Types.ObjectId("6a2da032a1988ba7bb7e9820");
 
     const existingUser = await User.findOne({ email, tenantId });
     if (existingUser) {

@@ -1,7 +1,6 @@
 import { useState } from "react";
 import {
   Plus,
-  MoreHorizontal,
   Pencil,
   Trash2,
   Loader2,
@@ -26,12 +25,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useForm } from "react-hook-form";
@@ -142,22 +135,22 @@ export default function Banners() {
   };
 
   return (
-    <div className="erp-page">
-      <div className="erp-page-header">
+    <div className="space-y-6">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="erp-page-title">Banners</h1>
-          <p className="erp-page-subtitle">Manage homepage banners</p>
+          <h2 className="text-2xl font-bold tracking-tight text-slate-900">Banners</h2>
+          <p className="text-sm text-slate-500 mt-1">Manage homepage banners</p>
         </div>
-        <Button onClick={() => openDialog()}>
+        <Button onClick={() => openDialog()} className="bg-slate-900 hover:bg-slate-800 text-white shadow-sm rounded-lg">
           <Plus className="mr-2 h-4 w-4" />
           Add Banner
         </Button>
       </div>
 
-      <Card>
-        <CardContent className="pt-6">
+      <Card className="border-slate-200 shadow-sm">
+        <CardContent className="p-0">
           {isLoading ? (
-            <div className="space-y-3">
+            <div className="p-5 space-y-3">
               {Array.from({ length: 3 }).map((_, i) => (
                 <Skeleton key={i} className="h-12 w-full" />
               ))}
@@ -166,51 +159,43 @@ export default function Banners() {
             <div className="overflow-x-auto">
               <Table>
                 <TableHeader>
-                  <TableRow>
-                    <TableHead>Title</TableHead>
-                    <TableHead>Display Order</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead className="text-right">Actions</TableHead>
+                  <TableRow className="border-slate-100 hover:bg-transparent">
+                    <TableHead className="font-semibold text-slate-600 pl-5">Title</TableHead>
+                    <TableHead className="font-semibold text-slate-600">Display Order</TableHead>
+                    <TableHead className="font-semibold text-slate-600">Status</TableHead>
+                    <TableHead className="font-semibold text-slate-600 text-right pr-5">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {banners.length === 0 ? (
                     <TableRow>
-                      <TableCell colSpan={4} className="text-center py-8 text-muted-foreground">
+                      <TableCell colSpan={4} className="text-center py-12 text-slate-500">
                         No banners found
                       </TableCell>
                     </TableRow>
                   ) : (
                     banners.map((banner) => (
-                      <TableRow key={banner._id}>
-                        <TableCell className="font-medium">{banner.title}</TableCell>
-                        <TableCell>{banner.displayOrder || 0}</TableCell>
+                      <TableRow key={banner._id} className="border-slate-50 hover:bg-slate-50/50">
+                        <TableCell className="font-medium text-slate-900 text-sm pl-5">{banner.title}</TableCell>
+                        <TableCell className="text-slate-600 text-sm">{banner.displayOrder || 0}</TableCell>
                         <TableCell>
-                          <Badge variant={banner.isActive !== false ? "default" : "secondary"}>
+                          <Badge variant="outline" className={
+                            banner.isActive !== false
+                              ? "text-emerald-700 bg-emerald-50 border-emerald-200"
+                              : "text-slate-600 bg-slate-50 border-slate-200"
+                          }>
                             {banner.isActive !== false ? "Active" : "Inactive"}
                           </Badge>
                         </TableCell>
-                        <TableCell className="text-right">
-                          <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                              <Button variant="ghost" size="icon">
-                                <MoreHorizontal className="h-4 w-4" />
-                              </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end">
-                              <DropdownMenuItem onClick={() => openDialog(banner)}>
-                                <Pencil className="mr-2 h-4 w-4" />
-                                Edit
-                              </DropdownMenuItem>
-                              <DropdownMenuItem
-                                onClick={() => openDeleteDialog(banner)}
-                                className="text-red-600"
-                              >
-                                <Trash2 className="mr-2 h-4 w-4" />
-                                Delete
-                              </DropdownMenuItem>
-                            </DropdownMenuContent>
-                          </DropdownMenu>
+                        <TableCell className="text-right pr-5">
+                          <div className="flex items-center justify-end gap-1">
+                            <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-500 hover:text-slate-700 hover:bg-slate-100" onClick={() => openDialog(banner)}>
+                              <Pencil className="h-4 w-4" />
+                            </Button>
+                            <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-500 hover:text-red-600 hover:bg-red-50" onClick={() => openDeleteDialog(banner)}>
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </div>
                         </TableCell>
                       </TableRow>
                     ))
@@ -223,58 +208,59 @@ export default function Banners() {
       </Card>
 
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent className="max-w-lg">
-          <DialogHeader>
-            <DialogTitle>{selectedBanner ? "Edit Banner" : "Add Banner"}</DialogTitle>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto border-slate-200">
+          <DialogHeader className="pb-4 border-b border-slate-100">
+            <DialogTitle className="text-lg font-semibold text-slate-900">{selectedBanner ? "Edit Banner" : "Add Banner"}</DialogTitle>
             <DialogDescription>
               {selectedBanner ? "Update banner details" : "Create a new banner"}
             </DialogDescription>
           </DialogHeader>
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 pt-2">
             <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="title">Title <span className="text-destructive">*</span></Label>
-                <Input id="title" {...register("title")} placeholder="Banner title" />
+              <div className="space-y-1.5">
+                <Label className="text-sm font-medium text-slate-700">Title <span className="text-destructive">*</span></Label>
+                <Input id="title" {...register("title")} placeholder="Banner title" className="border-slate-200 focus-visible:ring-slate-400/20" />
                 {errors.title && <p className="text-sm text-red-500">{errors.title.message}</p>}
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="displayOrder">Display Order</Label>
+              <div className="space-y-1.5">
+                <Label className="text-sm font-medium text-slate-700">Display Order</Label>
                 <Input
                   id="displayOrder"
                   type="number"
                   {...register("displayOrder")}
                   placeholder="0"
+                  className="border-slate-200 focus-visible:ring-slate-400/20"
                 />
               </div>
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="subtitle">Subtitle</Label>
-              <Input id="subtitle" {...register("subtitle")} placeholder="Banner subtitle" />
+            <div className="space-y-1.5">
+              <Label className="text-sm font-medium text-slate-700">Subtitle</Label>
+              <Input id="subtitle" {...register("subtitle")} placeholder="Banner subtitle" className="border-slate-200 focus-visible:ring-slate-400/20" />
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="image">Image URL <span className="text-destructive">*</span></Label>
-              <Input id="image" {...register("image")} placeholder="https://..." />
+            <div className="space-y-1.5">
+              <Label className="text-sm font-medium text-slate-700">Image URL <span className="text-destructive">*</span></Label>
+              <Input id="image" {...register("image")} placeholder="https://..." className="border-slate-200 focus-visible:ring-slate-400/20" />
               {errors.image && <p className="text-sm text-red-500">{errors.image.message}</p>}
             </div>
 
             <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="buttonText">Button Text</Label>
-                <Input id="buttonText" {...register("buttonText")} placeholder="Shop Now" />
+              <div className="space-y-1.5">
+                <Label className="text-sm font-medium text-slate-700">Button Text</Label>
+                <Input id="buttonText" {...register("buttonText")} placeholder="Shop Now" className="border-slate-200 focus-visible:ring-slate-400/20" />
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="buttonLink">Button Link</Label>
-                <Input id="buttonLink" {...register("buttonLink")} placeholder="/products" />
+              <div className="space-y-1.5">
+                <Label className="text-sm font-medium text-slate-700">Button Link</Label>
+                <Input id="buttonLink" {...register("buttonLink")} placeholder="/products" className="border-slate-200 focus-visible:ring-slate-400/20" />
               </div>
             </div>
 
-            <DialogFooter>
-              <Button type="button" variant="outline" onClick={() => setDialogOpen(false)}>
+            <DialogFooter className="pt-2">
+              <Button type="button" variant="outline" onClick={() => setDialogOpen(false)} className="border-slate-200">
                 Cancel
               </Button>
-              <Button type="submit" disabled={isMutating}>
+              <Button type="submit" disabled={isMutating} className="bg-slate-900 hover:bg-slate-800 text-white">
                 {isMutating && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 {selectedBanner ? "Update" : "Create"}
               </Button>
@@ -284,15 +270,13 @@ export default function Banners() {
       </Dialog>
 
       <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
-        <DialogContent>
+        <DialogContent className="max-w-md border-slate-200">
           <DialogHeader>
-            <DialogTitle>Delete Banner</DialogTitle>
-            <DialogDescription>
-              Are you sure you want to delete "{selectedBanner?.title}"? This action cannot be undone.
-            </DialogDescription>
+            <DialogTitle className="text-lg font-semibold text-slate-900">Delete Banner</DialogTitle>
           </DialogHeader>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setDeleteDialogOpen(false)}>
+          <p className="text-sm text-slate-500">Are you sure you want to delete <strong className="text-slate-900">{selectedBanner?.title}</strong>? This action cannot be undone.</p>
+          <DialogFooter className="pt-4">
+            <Button variant="outline" onClick={() => setDeleteDialogOpen(false)} className="border-slate-200">
               Cancel
             </Button>
             <Button variant="destructive" onClick={handleDelete} disabled={isMutating}>

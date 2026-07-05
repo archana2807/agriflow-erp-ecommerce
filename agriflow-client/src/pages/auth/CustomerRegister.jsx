@@ -143,6 +143,11 @@ export default function CustomerRegister() {
               Sign In
             </Link>
           </p>
+          <div className="mt-4 rounded-md border border-dashed border-green-300 bg-green-50 p-3 text-xs text-green-800">
+            <p className="mb-1 font-semibold">Demo Credentials</p>
+            <p>Customer: Archana@test.com / 123456</p>
+            <p>Admin: admin@test.com / 123456</p>
+          </div>
         </CardContent>
       </Card>
     </div>

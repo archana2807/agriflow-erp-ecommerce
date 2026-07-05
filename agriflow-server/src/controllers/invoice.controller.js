@@ -42,7 +42,7 @@ export const createInvoice = async (req, res, next) => {
       subtotal,
       gstAmount,
       totalAmount,
-      createdBy: req.user.user,
+      createdBy: req.user.id,
     });
 
     res.status(201).json({

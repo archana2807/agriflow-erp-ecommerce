@@ -1,4 +1,5 @@
 import jwt from "jsonwebtoken";
+import mongoose from "mongoose";
 import User from "../models/user.model.js";
 
 const JWT_SECRET = process.env.JWT_SECRET || "agriflow_jwt_secret_2026";
@@ -50,7 +51,7 @@ export const protect = async (req, res, next) => {
       name: user.name,
       email: user.email,
       role: user.role,
-      tenantId: user.tenantId,
+      tenantId: user.tenantId instanceof mongoose.Types.ObjectId ? user.tenantId : new mongoose.Types.ObjectId(String(user.tenantId)),
       isActive: user.isActive,
     };
 
@@ -104,7 +105,7 @@ export const optionalAuth = async (req, res, next) => {
         name: user.name,
         email: user.email,
         role: user.role,
-        tenantId: user.tenantId,
+        tenantId: user.tenantId instanceof mongoose.Types.ObjectId ? user.tenantId : new mongoose.Types.ObjectId(String(user.tenantId)),
       };
     } else {
       req.user = null;

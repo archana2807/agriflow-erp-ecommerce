@@ -66,10 +66,10 @@ export const addressSchema = z.object({
 
 export const couponSchema = z.object({
   code: z.string().min(1, "Coupon code is required"),
-  discountType: z.enum(["percentage", "flat"], { required_error: "Discount type is required" }),
+  discountType: z.enum(["PERCENTAGE", "FLAT"], { required_error: "Discount type is required" }),
   discountValue: z.coerce.number().positive("Discount value must be positive"),
-  minOrder: z.coerce.number().min(0, "Minimum order must be 0 or more").optional(),
-  maxDiscount: z.coerce.number().min(0).optional(),
+  minimumOrder: z.coerce.number().min(0, "Minimum order must be 0 or more").optional(),
+  maximumDiscount: z.coerce.number().min(0).optional(),
   expiryDate: z.string().min(1, "Expiry date is required"),
   usageLimit: z.coerce.number().int().min(1).optional(),
   isActive: z.boolean().optional(),

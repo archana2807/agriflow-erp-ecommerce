@@ -1,6 +1,6 @@
 ﻿import { useState, useCallback, useEffect, useRef } from "react";
 import { Link, useSearchParams, useNavigate } from "react-router-dom";
-import { Search, Star, Heart, X, SlidersHorizontal, RotateCcw, ChevronLeft, ChevronRight } from "lucide-react";
+import { Search, Star, Heart, X, SlidersHorizontal, RotateCcw, ChevronLeft, ChevronRight, ShoppingBag, Package } from "lucide-react";
 import { toast } from "sonner";
 import { formatCurrency } from "@/lib/utils";
 import { useCustomerAuth } from "@/contexts/CustomerAuthContext";
@@ -126,7 +126,7 @@ export default function Shop() {
 
   const handleAddToCart = (id) => {
     if (!isAuthenticated) { toast.error("Please login to add items to cart"); navigate("/customer/login"); return; }
-    addToCart.mutate({ productId: id, qty: 1 }, { onSuccess: () => toast.success("Added to cart"), onError: () => toast.error("Failed") });
+    addToCart.mutate({ productId: id, quantity: 1 }, { onSuccess: () => toast.success("Added to cart"), onError: () => toast.error("Failed") });
   };
 
   const handleToggleWishlist = (id) => {
@@ -152,28 +152,38 @@ export default function Shop() {
 
   return (
     <div className="shop-page">
-      <div className="shop-toolbar">
-        <div className="shop-toolbar-inner">
-          <div className="shop-search">
-            <Search className="h-4 w-4" />
-            <input type="text" placeholder="Search products..." value={searchInput} onChange={(e) => handleSearchChange(e.target.value)} />
-            {searchInput && <button className="search-clear" onClick={() => handleSearchChange("")}><X className="h-3 w-3" /></button>}
-          </div>
-          <div className="shop-toolbar-right">
-            <select className="shop-sort" value={sort} onChange={(e) => updateParams({ sort: e.target.value })}>
-              <option value="">Sort by</option>
-              <option value="newest">Newest</option>
-              <option value="price-low">Price: Low to High</option>
-              <option value="price-high">Price: High to Low</option>
-              <option value="popular">Popular</option>
-            </select>
-            <button className="shop-filter-toggle" onClick={() => setMobileFilterOpen(true)}>
-              <SlidersHorizontal className="h-4 w-4" />
-              Filters
-              {activeFilterCount > 0 && <span className="filter-count">{activeFilterCount}</span>}
-            </button>
+      {/* Hero Banner */}
+      <div className="page-hero page-hero-green">
+        <div className="page-hero-inner">
+          <div className="page-hero-content">
+            <ShoppingBag className="h-6 w-6" />
+            <div>
+              <h1>Shop</h1>
+              <p>{loading ? "Loading..." : `${total} product${total !== 1 ? "s" : ""} available`}</p>
+            </div>
           </div>
         </div>
+      </div>
+
+      {/* Search & Filter Toolbar */}
+      <div className="shop-toolbar">
+        <div className="shop-search">
+          <Search className="h-4 w-4" />
+          <input type="text" placeholder="Search products..." value={searchInput} onChange={(e) => handleSearchChange(e.target.value)} />
+          {searchInput && <button className="search-clear" onClick={() => handleSearchChange("")}><X className="h-3 w-3" /></button>}
+        </div>
+        <select className="shop-sort" value={sort} onChange={(e) => updateParams({ sort: e.target.value })}>
+          <option value="">Sort by</option>
+          <option value="newest">Newest</option>
+          <option value="price-low">Price: Low to High</option>
+          <option value="price-high">Price: High to Low</option>
+          <option value="popular">Popular</option>
+        </select>
+        <button className="shop-filter-toggle" onClick={() => setMobileFilterOpen(true)}>
+          <SlidersHorizontal className="h-4 w-4" />
+          Filters
+          {activeFilterCount > 0 && <span className="filter-count">{activeFilterCount}</span>}
+        </button>
       </div>
 
       {hasFilters && (

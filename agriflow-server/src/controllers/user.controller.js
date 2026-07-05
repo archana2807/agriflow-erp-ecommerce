@@ -151,7 +151,7 @@ export const updateUser = async (req, res, next) => {
  */
 export const deleteUser = async (req, res, next) => {
   try {
-    if (req.params.id === req.user.id) {
+    if (req.params.id === req.user.id.toString()) {
       return res.status(400).json({
         success: false,
         message: "Cannot delete your own account",
