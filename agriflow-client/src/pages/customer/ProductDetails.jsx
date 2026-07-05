@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useNavigate } from "react-router-dom";
 import {
   Star,
   Heart,
@@ -58,12 +58,16 @@ function ProductDetailsSkeleton() {
   );
 }
 
+import { useCustomerAuth } from "@/contexts/CustomerAuthContext";
+
 export default function ProductDetails() {
   const { slug } = useParams();
+  const navigate = useNavigate();
   const [selectedImage, setSelectedImage] = useState(0);
   const [quantity, setQuantity] = useState(1);
 
   const { data: productData, isLoading: loading } = useShopProduct(slug);
+  const { user } = useCustomerAuth();
   const addToCart = useAddToCart();
   const addToWishlist = useAddToWishlist();
   const removeFromWishlist = useRemoveFromWishlist();
@@ -73,6 +77,11 @@ export default function ProductDetails() {
 
   const handleAddToCart = () => {
     if (!product) return;
+    if (!user) {
+      toast.error("Please login to add items to cart");
+      navigate("/customer/login");
+      return;
+    }
     addToCart.mutate(
       { productId: product._id, qty: quantity },
       {
@@ -124,14 +133,14 @@ export default function ProductDetails() {
         <Link to="/" className="hover:text-green-700">Home</Link>
         <ChevronRight className="h-3 w-3" />
         <Link to="/shop" className="hover:text-green-700">Shop</Link>
-        {product.category && (
+        {product.categoryId && (
           <>
             <ChevronRight className="h-3 w-3" />
             <Link
-              to={`/shop?category=${product.category?.slug || product.category}`}
+              to={`/shop?category=${product.categoryId?.slug || product.categoryId}`}
               className="hover:text-green-700"
             >
-              {product.category?.name || product.category}
+              {product.categoryId?.name || product.categoryId}
             </Link>
           </>
         )}
@@ -169,9 +178,9 @@ export default function ProductDetails() {
         {/* Product Info Section */}
         <div className="space-y-5">
           <div>
-            {product.brand && (
+            {product.brandId && (
               <p className="text-sm text-green-700 font-semibold uppercase tracking-wide mb-1">
-                {product.brand?.name || product.brand}
+                {product.brandId?.name || product.brandId}
               </p>
             )}
             <h1 className="text-2xl md:text-3xl font-bold text-gray-900">{product.name}</h1>

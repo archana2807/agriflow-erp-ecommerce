@@ -5,7 +5,7 @@ import Category from "../models/category.model.js";
  */
 export const createCategory = async (req, res, next) => {
   try {
-    const { name, slug, image, description } = req.body;
+    const { name, slug, image, description } = req.validatedBody;
 
     const existing = await Category.findOne({
       slug,
@@ -78,7 +78,7 @@ export const getCategories = async (req, res, next) => {
 export const updateCategory = async (req, res, next) => {
   try {
     const { id } = req.params;
-    const { name, slug, image, description, isActive } = req.body;
+    const { name, slug, image, description, isActive } = req.validatedBody;
 
     const category = await Category.findOne({
       _id: id,

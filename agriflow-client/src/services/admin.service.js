@@ -1,15 +1,6 @@
 import { API } from "@/constants/api";
 import { get, post, put, del } from "./api";
-
-const buildQuery = (params) => {
-  if (!params) return "";
-  const q = new URLSearchParams();
-  Object.entries(params).forEach(([k, v]) => {
-    if (v !== undefined && v !== null && v !== "") q.append(k, v);
-  });
-  const s = q.toString();
-  return s ? `?${s}` : "";
-};
+import { buildQuery } from "@/lib/utils";
 
 const adminService = {
   customers: {

@@ -6,7 +6,7 @@ import Banner from "../models/banner.model.js";
 export const createBanner = async (req, res, next) => {
   try {
     const { title, subtitle, image, buttonText, buttonLink, displayOrder } =
-      req.body;
+      req.validatedBody;
 
     const banner = await Banner.create({
       title,
@@ -53,7 +53,7 @@ export const updateBanner = async (req, res, next) => {
   try {
     const { id } = req.params;
     const { title, subtitle, image, buttonText, buttonLink, displayOrder, isActive } =
-      req.body;
+      req.validatedBody;
 
     const banner = await Banner.findOne({
       _id: id,

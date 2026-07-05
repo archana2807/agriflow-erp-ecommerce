@@ -16,6 +16,7 @@ export const API = {
     REGISTER: `${BASE}/customer/register`,
     LOGIN: `${BASE}/customer/login`,
     LOGOUT: `${BASE}/customer/logout`,
+    ME: `${BASE}/customer/me`,
     PROFILE: `${BASE}/customer/profile`,
     UPDATE_PROFILE: `${BASE}/customer/profile`,
     CHANGE_PASSWORD: `${BASE}/customer/change-password`,

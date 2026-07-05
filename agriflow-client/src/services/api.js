@@ -10,12 +10,13 @@ async function apiFetch(url, options = {}) {
     credentials: "include",
   });
 
+  // try to parse JSON, but don't blow up if the body is empty (e.g. 204 responses)
   const data = await res.json().catch(() => ({}));
 
   if (!res.ok) {
-    const error = new Error(data.message || `Request failed with status ${res.status}`);
-    error.status = res.status;
-    throw error;
+    const err = new Error(data.message || `Request failed with status ${res.status}`);
+    err.status = res.status;
+    throw err;
   }
 
   return data;
@@ -25,12 +26,12 @@ export function get(url) {
   return apiFetch(url, { method: "GET" });
 }
 
-export function post(url, data) {
-  return apiFetch(url, { method: "POST", body: JSON.stringify(data) });
+export function post(url, body) {
+  return apiFetch(url, { method: "POST", body: JSON.stringify(body) });
 }
 
-export function put(url, data) {
-  return apiFetch(url, { method: "PUT", body: JSON.stringify(data) });
+export function put(url, body) {
+  return apiFetch(url, { method: "PUT", body: JSON.stringify(body) });
 }
 
 export function del(url) {

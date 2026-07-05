@@ -312,12 +312,12 @@ export default function Coupons() {
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="code">Code</Label>
+                <Label htmlFor="code">Code <span className="text-destructive">*</span></Label>
                 <Input id="code" {...register("code")} placeholder="e.g., SAVE10" />
                 {errors.code && <p className="text-sm text-red-500">{errors.code.message}</p>}
               </div>
               <div className="space-y-2">
-                <Label>Discount Type</Label>
+                <Label>Discount Type <span className="text-destructive">*</span></Label>
                 <Controller
                   control={control}
                   name="discountType"
@@ -341,7 +341,7 @@ export default function Coupons() {
 
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="discountValue">Discount Value</Label>
+                <Label htmlFor="discountValue">Discount Value <span className="text-destructive">*</span></Label>
                 <Input
                   id="discountValue"
                   type="number"
@@ -388,7 +388,7 @@ export default function Coupons() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="expiryDate">Expiry Date</Label>
+              <Label htmlFor="expiryDate">Expiry Date <span className="text-destructive">*</span></Label>
               <Input id="expiryDate" type="date" {...register("expiryDate")} />
               {errors.expiryDate && (
                 <p className="text-sm text-red-500">{errors.expiryDate.message}</p>

@@ -1,80 +1,68 @@
-import { useState, useEffect } from "react";
+import { useEffect } from "react";
 import { Loader2, User, Lock } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
 import { useAuth } from "@/contexts/AuthContext";
 import authService from "@/services/auth.service";
 import { toast } from "sonner";
+import { adminProfileUpdateSchema, passwordChangeSchema } from "@/utils/validators";
 
 export default function Settings() {
   const { user } = useAuth();
-  const [profileLoading, setProfileLoading] = useState(false);
-  const [passwordLoading, setPasswordLoading] = useState(false);
 
-  const [profile, setProfile] = useState({
-    name: "",
-    email: "",
+  const profileForm = useForm({
+    resolver: zodResolver(adminProfileUpdateSchema),
+    defaultValues: { name: "", email: "" },
   });
 
-  const [password, setPassword] = useState({
-    currentPassword: "",
-    newPassword: "",
-    confirmPassword: "",
+  const passwordForm = useForm({
+    resolver: zodResolver(passwordChangeSchema),
+    defaultValues: { currentPassword: "", newPassword: "", confirmPassword: "" },
   });
 
   useEffect(() => {
     if (user) {
-      setProfile({
+      profileForm.reset({
         name: user.name || "",
         email: user.email || "",
       });
     }
-  }, [user]);
+  }, [user, profileForm]);
 
-  const handleProfileUpdate = async (e) => {
-    e.preventDefault();
+  const handleProfileUpdate = async (data) => {
     try {
-      setProfileLoading(true);
-      const res = await authService.updateProfile({
-        name: profile.name,
-        email: profile.email,
-      });
+      const res = await authService.updateProfile(data);
       if (res.success) {
         toast.success("Profile updated successfully");
       }
     } catch (error) {
       toast.error(error.message || "Failed to update profile");
-    } finally {
-      setProfileLoading(false);
     }
   };
 
-  const handlePasswordChange = async (e) => {
-    e.preventDefault();
-    if (password.newPassword !== password.confirmPassword) {
-      toast.error("Passwords do not match");
-      return;
-    }
-    if (password.newPassword.length < 6) {
-      toast.error("Password must be at least 6 characters");
-      return;
-    }
+  const handlePasswordChange = async (data) => {
     try {
-      setPasswordLoading(true);
       const res = await authService.changePassword({
-        currentPassword: password.currentPassword,
-        newPassword: password.newPassword,
+        currentPassword: data.currentPassword,
+        newPassword: data.newPassword,
       });
       if (res.success) {
         toast.success("Password changed successfully");
-        setPassword({ currentPassword: "", newPassword: "", confirmPassword: "" });
+        passwordForm.reset();
       }
     } catch (error) {
       toast.error(error.message || "Failed to change password");
-    } finally {
-      setPasswordLoading(false);
     }
   };
 
@@ -94,33 +82,40 @@ export default function Settings() {
           <CardDescription>Update your personal information</CardDescription>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleProfileUpdate} className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="name">Name</Label>
-              <Input
-                id="name"
-                value={profile.name}
-                onChange={(e) => setProfile({ ...profile, name: e.target.value })}
-                placeholder="Your name"
-                autoComplete="name"
+          <Form {...profileForm}>
+            <form onSubmit={profileForm.handleSubmit(handleProfileUpdate)} className="space-y-4">
+              <FormField
+                control={profileForm.control}
+                name="name"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel required>Name</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Your name" autoComplete="name" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
               />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
-              <Input
-                id="email"
-                type="email"
-                value={profile.email}
-                onChange={(e) => setProfile({ ...profile, email: e.target.value })}
-                placeholder="Your email"
-                autoComplete="email"
+              <FormField
+                control={profileForm.control}
+                name="email"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel required>Email</FormLabel>
+                    <FormControl>
+                      <Input type="email" placeholder="Your email" autoComplete="email" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
               />
-            </div>
-            <Button type="submit" disabled={profileLoading}>
-              {profileLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Save Changes
-            </Button>
-          </form>
+              <Button type="submit" disabled={profileForm.formState.isSubmitting}>
+                {profileForm.formState.isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                Save Changes
+              </Button>
+            </form>
+          </Form>
         </CardContent>
       </Card>
 
@@ -133,45 +128,53 @@ export default function Settings() {
           <CardDescription>Update your password</CardDescription>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handlePasswordChange} className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="currentPassword">Current Password</Label>
-              <Input
-                id="currentPassword"
-                type="password"
-                value={password.currentPassword}
-                onChange={(e) => setPassword({ ...password, currentPassword: e.target.value })}
-                placeholder="Enter current password"
-                autoComplete="current-password"
+          <Form {...passwordForm}>
+            <form onSubmit={passwordForm.handleSubmit(handlePasswordChange)} className="space-y-4">
+              <FormField
+                control={passwordForm.control}
+                name="currentPassword"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel required>Current Password</FormLabel>
+                    <FormControl>
+                      <Input type="password" placeholder="Enter current password" autoComplete="current-password" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
               />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="newPassword">New Password</Label>
-              <Input
-                id="newPassword"
-                type="password"
-                value={password.newPassword}
-                onChange={(e) => setPassword({ ...password, newPassword: e.target.value })}
-                placeholder="Enter new password"
-                autoComplete="new-password"
+              <FormField
+                control={passwordForm.control}
+                name="newPassword"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel required>New Password</FormLabel>
+                    <FormControl>
+                      <Input type="password" placeholder="Enter new password" autoComplete="new-password" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
               />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="confirmPassword">Confirm New Password</Label>
-              <Input
-                id="confirmPassword"
-                type="password"
-                value={password.confirmPassword}
-                onChange={(e) => setPassword({ ...password, confirmPassword: e.target.value })}
-                placeholder="Confirm new password"
-                autoComplete="new-password"
+              <FormField
+                control={passwordForm.control}
+                name="confirmPassword"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel required>Confirm New Password</FormLabel>
+                    <FormControl>
+                      <Input type="password" placeholder="Confirm new password" autoComplete="new-password" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
               />
-            </div>
-            <Button type="submit" disabled={passwordLoading}>
-              {passwordLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Change Password
-            </Button>
-          </form>
+              <Button type="submit" disabled={passwordForm.formState.isSubmitting}>
+                {passwordForm.formState.isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                Change Password
+              </Button>
+            </form>
+          </Form>
         </CardContent>
       </Card>
     </div>

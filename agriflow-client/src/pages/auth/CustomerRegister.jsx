@@ -63,7 +63,7 @@ export default function CustomerRegister() {
                 name="name"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Full Name</FormLabel>
+                    <FormLabel required>Full Name</FormLabel>
                     <FormControl>
                       <Input
                         placeholder="John Doe"
@@ -80,7 +80,7 @@ export default function CustomerRegister() {
                 name="email"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Email</FormLabel>
+                    <FormLabel required>Email</FormLabel>
                     <FormControl>
                       <Input
                         type="email"
@@ -116,7 +116,7 @@ export default function CustomerRegister() {
                 name="password"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Password</FormLabel>
+                    <FormLabel required>Password</FormLabel>
                     <FormControl>
                       <Input
                         type="password"

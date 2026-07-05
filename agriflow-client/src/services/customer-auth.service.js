@@ -11,6 +11,9 @@ const customerAuthService = {
   logout() {
     return post(API.CUSTOMER_AUTH.LOGOUT);
   },
+  getMe() {
+    return get(API.CUSTOMER_AUTH.ME);
+  },
   getProfile() {
     return get(API.CUSTOMER_AUTH.PROFILE);
   },

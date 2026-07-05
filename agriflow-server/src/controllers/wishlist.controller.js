@@ -8,7 +8,6 @@ export const getWishlist = async (req, res, next) => {
   try {
     const wishlist = await Wishlist.find({
       customerId: req.customer.id,
-      tenantId: req.customer.tenantId,
     })
       .populate("productId", "name slug images sellingPrice price stock isActive")
       .sort({ createdAt: -1 });
@@ -31,7 +30,6 @@ export const addToWishlist = async (req, res, next) => {
 
     const product = await Product.findOne({
       _id: productId,
-      tenantId: req.customer.tenantId,
       isDeleted: false,
       isActive: true,
     });
@@ -46,7 +44,6 @@ export const addToWishlist = async (req, res, next) => {
     const existing = await Wishlist.findOne({
       customerId: req.customer.id,
       productId,
-      tenantId: req.customer.tenantId,
     });
 
     if (existing) {
@@ -82,7 +79,6 @@ export const removeFromWishlist = async (req, res, next) => {
     const wishlistItem = await Wishlist.findOneAndDelete({
       customerId: req.customer.id,
       productId,
-      tenantId: req.customer.tenantId,
     });
 
     if (!wishlistItem) {

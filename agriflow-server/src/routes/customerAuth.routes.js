@@ -24,6 +24,7 @@ router.post("/login", validate(customerLoginSchema), loginCustomer);
 router.post("/logout", logoutCustomer);
 
 // PROTECTED - any authenticated customer
+router.get("/me", protectCustomer, getCustomerProfile);
 router.get("/profile", protectCustomer, getCustomerProfile);
 router.put("/profile", protectCustomer, validate(updateCustomerProfileSchema), updateCustomerProfile);
 router.put("/change-password", protectCustomer, validate(customerChangePasswordSchema), changeCustomerPassword);

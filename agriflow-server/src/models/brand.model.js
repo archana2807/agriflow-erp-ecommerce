@@ -1,5 +1,17 @@
 import mongoose from "mongoose";
 
+function slugify(text) {
+  return text
+    .toString()
+    .toLowerCase()
+    .trim()
+    .replace(/\s+/g, "-")
+    .replace(/[^\w-]+/g, "")
+    .replace(/--+/g, "-")
+    .replace(/^-+/, "")
+    .replace(/-+$/, "");
+}
+
 const brandSchema = new mongoose.Schema(
   {
     tenantId: {
@@ -12,6 +24,11 @@ const brandSchema = new mongoose.Schema(
       type: String,
       required: true,
       trim: true,
+    },
+
+    slug: {
+      type: String,
+      default: null,
     },
 
     logo: {
@@ -33,5 +50,13 @@ const brandSchema = new mongoose.Schema(
 );
 
 brandSchema.index({ tenantId: 1, name: 1 }, { unique: true });
+brandSchema.index({ tenantId: 1, slug: 1 }, { sparse: true });
+
+brandSchema.pre("save", function (next) {
+  if (this.isModified("name") && !this.slug) {
+    this.slug = slugify(this.name);
+  }
+  next();
+});
 
 export default mongoose.model("Brand", brandSchema);

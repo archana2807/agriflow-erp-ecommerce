@@ -2,9 +2,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import adminService from "@/services/admin.service";
 import shopService from "@/services/shop.service";
 
-// ==================== ADMIN HOOKS ====================
-
-// Dashboard
+// admin dashboard
 export function useDashboardStats() {
   return useQuery({
     queryKey: ["dashboard"],
@@ -12,7 +10,7 @@ export function useDashboardStats() {
   });
 }
 
-// Customers
+// customers
 export function useCustomers(params) {
   return useQuery({
     queryKey: ["customers", params],
@@ -44,7 +42,7 @@ export function useDeleteCustomer() {
   });
 }
 
-// Categories
+// categories
 export function useCategories(params) {
   return useQuery({
     queryKey: ["categories", params],
@@ -76,7 +74,7 @@ export function useDeleteCategory() {
   });
 }
 
-// Brands
+// brands
 export function useBrands(params) {
   return useQuery({
     queryKey: ["brands", params],
@@ -108,7 +106,7 @@ export function useDeleteBrand() {
   });
 }
 
-// Products
+// products
 export function useProducts(params) {
   return useQuery({
     queryKey: ["admin-products", params],
@@ -140,7 +138,7 @@ export function useDeleteProduct() {
   });
 }
 
-// Orders
+// orders
 export function useCreateOrder() {
   const qc = useQueryClient();
   return useMutation({
@@ -177,7 +175,7 @@ export function useDeleteOrder() {
   });
 }
 
-// Invoices
+// invoices & payments
 export function useInvoices(params) {
   return useQuery({
     queryKey: ["invoices", params],
@@ -193,7 +191,6 @@ export function useInvoiceByOrder(orderId) {
   });
 }
 
-// Payments
 export function usePayments(params) {
   return useQuery({
     queryKey: ["payments", params],
@@ -220,7 +217,7 @@ export function usePaymentsByInvoice(invoiceId) {
   });
 }
 
-// Coupons
+// coupons
 export function useCoupons(params) {
   return useQuery({
     queryKey: ["coupons", params],
@@ -252,7 +249,7 @@ export function useDeleteCoupon() {
   });
 }
 
-// Banners
+// banners
 export function useBanners() {
   return useQuery({
     queryKey: ["banners"],
@@ -284,7 +281,7 @@ export function useDeleteBanner() {
   });
 }
 
-// ==================== SHOP HOOKS ====================
+// ---- shop / customer facing ----
 
 export function useShopProducts(params) {
   return useQuery({
@@ -336,11 +333,12 @@ export function useBestSellers() {
   });
 }
 
-// Cart
-export function useCart() {
+// cart
+export function useCart(enabled = true) {
   return useQuery({
     queryKey: ["cart"],
     queryFn: () => shopService.getCart(),
+    enabled,
   });
 }
 
@@ -376,11 +374,12 @@ export function useClearCart() {
   });
 }
 
-// Wishlist
-export function useWishlist() {
+// wishlist
+export function useWishlist(enabled = true) {
   return useQuery({
     queryKey: ["wishlist"],
     queryFn: () => shopService.getWishlist(),
+    enabled,
   });
 }
 
@@ -400,7 +399,7 @@ export function useRemoveFromWishlist() {
   });
 }
 
-// Addresses
+// addresses
 export function useAddresses() {
   return useQuery({
     queryKey: ["addresses"],
@@ -432,7 +431,7 @@ export function useDeleteAddress() {
   });
 }
 
-// Checkout
+// checkout
 export function useCheckout() {
   const qc = useQueryClient();
   return useMutation({
@@ -444,7 +443,7 @@ export function useCheckout() {
   });
 }
 
-// My Orders
+// customer orders
 export function useMyOrders(params) {
   return useQuery({
     queryKey: ["my-orders", params],

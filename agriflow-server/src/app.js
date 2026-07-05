@@ -1,9 +1,13 @@
 import express from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
+import helmet from "helmet";
+import compression from "compression";
+import morgan from "morgan";
+import { errorHandler } from "./middlewares/error.middleware.js";
+import { tenantRateLimiterMiddleware } from "./middlewares/tenantRateLimiter.middleware.js";
 import authRoutes from "./routes/auth.routes.js";
 import customerRoutes from "./routes/customer.routes.js";
-import { errorHandler } from "./middlewares/error.middleware.js";
 import orderRoutes from "./routes/order.routes.js";
 import invoiceRoutes from "./routes/invoice.routes.js";
 import paymentRoutes from "./routes/payment.routes.js";
@@ -29,13 +33,23 @@ import couponRoutes from "./routes/coupon.routes.js";
 
 const app = express();
 
-// Middleware
+// Security & Performance Middleware
+app.use(helmet());
+app.use(compression());
+app.use(morgan("combined"));
+
+// CORS & Parsing
 app.use(cors({
   origin: process.env.CLIENT_URL || "http://localhost:5173",
   credentials: true,
 }));
-app.use(express.json());
+app.use(express.json({ limit: "10mb" }));
 app.use(cookieParser());
+
+// Rate Limiting
+app.use("/api/", tenantRateLimiterMiddleware);
+
+// Error Handler (must be last)
 app.use(errorHandler);
 
 // Public Routes

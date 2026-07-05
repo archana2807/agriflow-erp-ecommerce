@@ -233,7 +233,7 @@ export default function Banners() {
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="title">Title</Label>
+                <Label htmlFor="title">Title <span className="text-destructive">*</span></Label>
                 <Input id="title" {...register("title")} placeholder="Banner title" />
                 {errors.title && <p className="text-sm text-red-500">{errors.title.message}</p>}
               </div>
@@ -254,7 +254,7 @@ export default function Banners() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="image">Image URL</Label>
+              <Label htmlFor="image">Image URL <span className="text-destructive">*</span></Label>
               <Input id="image" {...register("image")} placeholder="https://..." />
               {errors.image && <p className="text-sm text-red-500">{errors.image.message}</p>}
             </div>

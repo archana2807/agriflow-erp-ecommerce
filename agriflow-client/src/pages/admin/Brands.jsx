@@ -275,7 +275,7 @@ export default function Brands() {
           </DialogHeader>
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="name">Name</Label>
+              <Label htmlFor="name">Name <span className="text-destructive">*</span></Label>
               <Input id="name" {...register("name")} placeholder="Enter brand name" />
               {errors.name && (
                 <p className="text-sm text-red-500">{errors.name.message}</p>

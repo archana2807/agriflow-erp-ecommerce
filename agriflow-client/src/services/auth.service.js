@@ -11,8 +11,11 @@ const authService = {
   logout() {
     return post(API.AUTH.LOGOUT);
   },
-  getProfile() {
+  getMe() {
     return get(API.AUTH.ME);
+  },
+  getProfile() {
+    return get(API.AUTH.PROFILE);
   },
   updateProfile(data) {
     return put(API.AUTH.UPDATE_PROFILE, data);

@@ -2,6 +2,7 @@ import express from "express";
 import { protect } from "../middlewares/auth.middleware.js";
 import { authorize } from "../middlewares/role.middleware.js";
 import { tenantMiddleware } from "../middlewares/tenant.middleware.js";
+import { validate } from "../middlewares/validate.middleware.js";
 import {
   createCoupon,
   getCoupons,
@@ -9,6 +10,10 @@ import {
   deleteCoupon,
   validateCoupon,
 } from "../controllers/coupon.controller.js";
+import {
+  createCouponSchema,
+  updateCouponSchema,
+} from "../validations/coupon.validation.js";
 
 const router = express.Router();
 
@@ -21,6 +26,7 @@ router.post(
   protect,
   authorize("ADMIN"),
   tenantMiddleware,
+  validate(createCouponSchema),
   createCoupon
 );
 
@@ -31,6 +37,7 @@ router.put(
   protect,
   authorize("ADMIN"),
   tenantMiddleware,
+  validate(updateCouponSchema),
   updateCoupon
 );
 

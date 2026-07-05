@@ -1,11 +1,19 @@
 import { ProductService } from "../services/product.service.js";
 
+function mapProductData(body) {
+  const { category, brand, ...rest } = body;
+  if (category) rest.categoryId = category;
+  if (brand) rest.brandId = brand;
+  return rest;
+}
+
 /**
  * CREATE PRODUCT (Admin only)
  */
 export const createProduct = async (req, res, next) => {
   try {
-    const product = await ProductService.createProduct(req.tenantId, req.body);
+    const data = mapProductData(req.validatedBody);
+    const product = await ProductService.createProduct(req.tenantId, data);
 
     res.status(201).json({
       success: true,
@@ -66,10 +74,11 @@ export const getProductById = async (req, res, next) => {
  */
 export const updateProduct = async (req, res, next) => {
   try {
+    const data = mapProductData(req.validatedBody || req.body);
     const product = await ProductService.updateProduct(
       req.tenantId,
       req.params.id,
-      req.body
+      data
     );
 
     res.status(200).json({

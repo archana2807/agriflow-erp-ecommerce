@@ -5,7 +5,7 @@ import Brand from "../models/brand.model.js";
  */
 export const createBrand = async (req, res, next) => {
   try {
-    const { name, logo, description } = req.body;
+    const { name, logo, description } = req.validatedBody;
 
     const existing = await Brand.findOne({
       name,
@@ -77,7 +77,7 @@ export const getBrands = async (req, res, next) => {
 export const updateBrand = async (req, res, next) => {
   try {
     const { id } = req.params;
-    const { name, logo, description, isActive } = req.body;
+    const { name, logo, description, isActive } = req.validatedBody;
 
     const brand = await Brand.findOne({
       _id: id,

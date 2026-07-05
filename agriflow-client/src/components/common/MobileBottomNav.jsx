@@ -5,7 +5,6 @@ export default function MobileBottomNav({ cartCount = 0, user }) {
   const tabs = [
     { icon: "fa-home", label: "Home", to: "/" },
     { icon: "fa-tag", label: "Shop", to: "/shop" },
-    { icon: "fa-receipt", label: "Orders", to: "/my-orders" },
     { icon: "fa-shopping-cart", label: "Cart", to: "/cart", badge: cartCount },
     { icon: "fa-user", label: user ? "Account" : "Login", to: user ? "/account" : "/login" },
   ];

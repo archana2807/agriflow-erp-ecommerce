@@ -13,7 +13,7 @@ export const createCoupon = async (req, res, next) => {
       maximumDiscount,
       expiryDate,
       usageLimit,
-    } = req.body;
+    } = req.validatedBody;
 
     const existing = await Coupon.findOne({
       code: code.toUpperCase(),
@@ -94,7 +94,7 @@ export const updateCoupon = async (req, res, next) => {
       expiryDate,
       usageLimit,
       isActive,
-    } = req.body;
+    } = req.validatedBody;
 
     const coupon = await Coupon.findOne({
       _id: id,

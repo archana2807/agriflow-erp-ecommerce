@@ -1,50 +1,23 @@
-import { useState, useEffect, createContext, useContext } from "react";
-import { Outlet, useNavigate } from "react-router-dom";
-import { Loader2 } from "lucide-react";
-import { useAuth } from "@/contexts/AuthContext";
+import { useState } from "react";
+import { Outlet } from "react-router-dom";
 import AdminSidebar from "@/components/layout/AdminSidebar";
 import AdminHeader from "@/components/layout/AdminHeader";
 
-export const SidebarContext = createContext();
-
-export function useSidebar() {
-  return useContext(SidebarContext);
-}
-
 export default function AdminLayout() {
-  const { isAuthenticated, loading } = useAuth();
-  const navigate = useNavigate();
   const [collapsed, setCollapsed] = useState(false);
 
-  useEffect(() => {
-    if (!loading && !isAuthenticated) {
-      navigate("/admin/login", { replace: true });
-    }
-  }, [loading, isAuthenticated]);
-
-  if (loading) {
-    return (
-      <div className="erp-loading">
-        <Loader2 className="h-8 w-8 animate-spin" style={{ color: "#16a34a" }} />
-      </div>
-    );
-  }
-
-  if (!isAuthenticated) {
-    return null;
-  }
-
   return (
-    <SidebarContext.Provider value={{ collapsed, setCollapsed }}>
-      <div className="erp-layout">
-        <AdminSidebar collapsed={collapsed} onToggle={() => setCollapsed(!collapsed)} />
-        <div className={`erp-main ${collapsed ? "sidebar-collapsed" : ""}`}>
-          <AdminHeader />
-          <main className="erp-content">
-            <Outlet />
-          </main>
-        </div>
+    <div className="flex h-screen overflow-hidden bg-gray-50">
+      <AdminSidebar collapsed={collapsed} onToggle={() => setCollapsed(!collapsed)} />
+      <div
+        data-collapsed={collapsed}
+        className="flex flex-1 flex-col overflow-hidden transition-all duration-200 ml-64 data-[collapsed=true]:ml-[4.5rem] max-lg:ml-0"
+      >
+        <AdminHeader onToggleSidebar={() => setCollapsed(!collapsed)} />
+        <main className="flex-1 overflow-y-auto p-6 lg:p-8">
+          <Outlet />
+        </main>
       </div>
-    </SidebarContext.Provider>
+    </div>
   );
 }

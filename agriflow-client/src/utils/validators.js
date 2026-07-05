@@ -74,3 +74,33 @@ export const couponSchema = z.object({
   usageLimit: z.coerce.number().int().min(1).optional(),
   isActive: z.boolean().optional(),
 });
+
+export const bannerSchema = z.object({
+  title: z.string().min(1, "Title is required"),
+  subtitle: z.string().optional().or(z.literal("")),
+  image: z.string().min(1, "Image URL is required"),
+  buttonText: z.string().optional().or(z.literal("")),
+  buttonLink: z.string().optional().or(z.literal("")),
+  displayOrder: z.coerce.number().int().min(0).optional(),
+  isActive: z.boolean().optional(),
+});
+
+export const profileUpdateSchema = z.object({
+  name: z.string().min(2, "Name must be at least 2 characters"),
+  email: z.string().email("Invalid email address"),
+  phone: z.string().min(10, "Phone must be at least 10 digits").optional().or(z.literal("")),
+});
+
+export const adminProfileUpdateSchema = z.object({
+  name: z.string().min(2, "Name must be at least 2 characters"),
+  email: z.string().email("Invalid email address"),
+});
+
+export const passwordChangeSchema = z.object({
+  currentPassword: z.string().min(1, "Current password is required"),
+  newPassword: z.string().min(6, "New password must be at least 6 characters"),
+  confirmPassword: z.string().min(1, "Please confirm your password"),
+}).refine((data) => data.newPassword === data.confirmPassword, {
+  message: "Passwords do not match",
+  path: ["confirmPassword"],
+});

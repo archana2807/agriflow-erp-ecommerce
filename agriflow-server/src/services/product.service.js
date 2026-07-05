@@ -1,4 +1,6 @@
 import Product from "../models/product.model.js";
+import Category from "../models/category.model.js";
+import Brand from "../models/brand.model.js";
 
 export class ProductService {
   static async createProduct(tenantId, data) {
@@ -21,7 +23,7 @@ export class ProductService {
       isDeleted: false,
       name: { $regex: search, $options: "i" },
     };
-
+     
     const skip = (page - 1) * limit;
 
     const [products, total] = await Promise.all([
@@ -33,6 +35,7 @@ export class ProductService {
         .sort({ createdAt: -1 }),
       Product.countDocuments(query),
     ]);
+   
 
     return { products, total, page, limit };
   }
@@ -107,6 +110,8 @@ export class ProductService {
     brand,
     minPrice,
     maxPrice,
+    priceMin,
+    priceMax,
     inStock,
   }) {
     const query = { isDeleted: false, isActive: true };
@@ -118,13 +123,42 @@ export class ProductService {
       ];
     }
 
-    if (category) query.categoryId = category;
-    if (brand) query.brandId = brand;
+    if (category) {
+      const slugs = category.split(",").map((s) => s.trim()).filter(Boolean);
+      const cats = await Category.find({ slug: { $in: slugs } }).select("_id");
 
-    if (minPrice || maxPrice) {
-      query.sellingPrice = {};
-      if (minPrice) query.sellingPrice.$gte = Number(minPrice);
-      if (maxPrice) query.sellingPrice.$lte = Number(maxPrice);
+      if (cats.length) {
+        query.categoryId = { $in: cats.map((c) => c._id) };
+      } else {
+        return { products: [], total: 0, page: Number(page), limit: Number(limit), priceRange: { minPrice: 0, maxPrice: 0 } };
+      }
+    }
+    if (brand) {
+      const values = brand.split(",").map((s) => s.trim()).filter(Boolean);
+      const objectIds = values.filter((v) => /^[0-9a-fA-F]{24}$/.test(v));
+      const slugs = values.filter((v) => !/^[0-9a-fA-F]{24}$/.test(v));
+      const brandQuery = {};
+      if (objectIds.length && slugs.length) {
+        brandQuery.$or = [{ _id: { $in: objectIds } }, { slug: { $in: slugs } }];
+      } else if (objectIds.length) {
+        brandQuery._id = { $in: objectIds };
+      } else if (slugs.length) {
+        brandQuery.slug = { $in: slugs };
+      }
+      const brands = await Brand.find(brandQuery).select("_id");
+      if (brands.length) {
+        query.brandId = { $in: brands.map((b) => b._id) };
+      } else {
+        return { products: [], total: 0, page: Number(page), limit: Number(limit), priceRange: { minPrice: 0, maxPrice: 0 } };
+      }
+    }
+
+    const effectiveMin = minPrice || priceMin;
+    const effectiveMax = maxPrice || priceMax;
+    if (effectiveMin || effectiveMax) {
+      query.price = {};
+      if (effectiveMin) query.price.$gte = Number(effectiveMin);
+      if (effectiveMax) query.price.$lte = Number(effectiveMax);
     }
 
     if (inStock === "true") {
@@ -134,8 +168,8 @@ export class ProductService {
     const skip = (Number(page) - 1) * Number(limit);
 
     let sortObj = { createdAt: -1 };
-    if (sort === "price-low") sortObj = { sellingPrice: 1 };
-    else if (sort === "price-high") sortObj = { sellingPrice: -1 };
+    if (sort === "price-low") sortObj = { price: 1 };
+    else if (sort === "price-high") sortObj = { price: -1 };
     else if (sort === "name") sortObj = { name: 1 };
     else if (sort === "popular") sortObj = { bestSeller: -1, createdAt: -1 };
 
@@ -152,8 +186,8 @@ export class ProductService {
         {
           $group: {
             _id: null,
-            minPrice: { $min: "$sellingPrice" },
-            maxPrice: { $max: "$sellingPrice" },
+            minPrice: { $min: "$price" },
+            maxPrice: { $max: "$price" },
           },
         },
       ]),

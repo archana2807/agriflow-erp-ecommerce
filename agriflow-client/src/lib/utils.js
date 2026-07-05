@@ -23,3 +23,14 @@ export function formatDate(date) {
 export function truncate(str, len = 50) {
   return str?.length > len ? str.slice(0, len) + "..." : str;
 }
+
+// TODO: move this somewhere better later
+export function buildQuery(params) {
+  if (!params) return "";
+  const q = new URLSearchParams();
+  Object.entries(params).forEach(([k, v]) => {
+    if (v !== undefined && v !== null && v !== "") q.append(k, v);
+  });
+  const s = q.toString();
+  return s ? `?${s}` : "";
+}

@@ -2,7 +2,6 @@ import { useState } from "react";
 import {
   Plus,
   Search,
-  MoreHorizontal,
   Pencil,
   Trash2,
   Loader2,
@@ -29,12 +28,6 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import {
   Pagination,
   PaginationContent,
   PaginationItem,
@@ -56,22 +49,21 @@ import { categorySchema } from "@/utils/validators";
 import { toast } from "sonner";
 
 export default function Categories() {
-  const [search, setSearch] = useState("");
-  const [page, setPage] = useState(1);
-  const [dialogOpen, setDialogOpen] = useState(false);
-  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [selectedCategory, setSelectedCategory] = useState(null);
+  const [q, setQ] = useState("");
+  const [curPage, setCurPage] = useState(1);
+  const [open, setOpen] = useState(false);
+  const [delTarget, setDelTarget] = useState(null);
+  const [editing, setEditing] = useState(null);
 
-  const params = { page, search, limit: 10 };
-  const { data: res, isLoading } = useCategories(params);
+  const { data: res, isLoading } = useCategories({ page: curPage, search: q, limit: 10 });
   const categories = res?.categories || [];
   const totalPages = res?.totalPages || Math.ceil((res?.total || 0) / 10) || 1;
 
-  const createMutation = useCreateCategory();
-  const updateMutation = useUpdateCategory();
-  const deleteMutation = useDeleteCategory();
+  const createMut = useCreateCategory();
+  const updateMut = useUpdateCategory();
+  const deleteMut = useDeleteCategory();
 
-  const isMutating = createMutation.isPending || updateMutation.isPending || deleteMutation.isPending;
+  const busy = createMut.isPending || updateMut.isPending || deleteMut.isPending;
 
   const {
     register,
@@ -82,62 +74,45 @@ export default function Categories() {
     resolver: zodResolver(categorySchema),
   });
 
-  const handleSearch = (e) => {
-    setSearch(e.target.value);
-    setPage(1);
-  };
-
-  const openDialog = (category = null) => {
-    setSelectedCategory(category);
-    if (category) {
-      reset({
-        name: category.name,
-        slug: category.slug,
-        description: category.description || "",
-      });
-    } else {
-      reset({ name: "", slug: "", description: "" });
-    }
-    setDialogOpen(true);
-  };
-
-  const openDeleteDialog = (category) => {
-    setSelectedCategory(category);
-    setDeleteDialogOpen(true);
+  const openDialog = (cat = null) => {
+    setEditing(cat);
+    reset(cat ? { name: cat.name, slug: cat.slug, description: cat.description || "" } : { name: "", slug: "", description: "" });
+    setOpen(true);
   };
 
   const onSubmit = (data) => {
-    if (selectedCategory) {
-      updateMutation.mutate(
-        { id: selectedCategory._id, data },
+    if (editing) {
+      updateMut.mutate(
+        { id: editing._id, data },
         {
           onSuccess: () => {
-            toast.success("Category updated successfully");
-            setDialogOpen(false);
+            toast.success("Category updated");
+            setOpen(false);
             reset();
           },
-          onError: (error) => toast.error(error.message || "Operation failed"),
+          onError: (err) => toast.error(err.message || "Update failed"),
         }
       );
     } else {
-      createMutation.mutate(data, {
+      createMut.mutate(data, {
         onSuccess: () => {
-          toast.success("Category created successfully");
-          setDialogOpen(false);
+          toast.success("Category created");
+          setOpen(false);
           reset();
         },
-        onError: (error) => toast.error(error.message || "Operation failed"),
+        onError: (err) => toast.error(err.message || "Create failed"),
       });
     }
   };
 
-  const handleDelete = () => {
-    deleteMutation.mutate(selectedCategory._id, {
+  const confirmDelete = () => {
+    if (!delTarget) return;
+    deleteMut.mutate(delTarget._id, {
       onSuccess: () => {
-        toast.success("Category deleted successfully");
-        setDeleteDialogOpen(false);
+        toast.success("Category deleted");
+        setDelTarget(null);
       },
-      onError: (error) => toast.error(error.message || "Failed to delete category"),
+      onError: (err) => toast.error(err.message || "Delete failed"),
     });
   };
 
@@ -161,8 +136,8 @@ export default function Categories() {
               <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               <Input
                 placeholder="Search categories..."
-                value={search}
-                onChange={handleSearch}
+                value={q}
+                onChange={(e) => { setQ(e.target.value); setCurPage(1); }}
                 className="pl-9"
               />
             </div>
@@ -183,7 +158,7 @@ export default function Categories() {
                     <TableHead>Name</TableHead>
                     <TableHead>Slug</TableHead>
                     <TableHead>Status</TableHead>
-                    <TableHead className="text-right">Actions</TableHead>
+                    <TableHead className="text-right"></TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -194,36 +169,29 @@ export default function Categories() {
                       </TableCell>
                     </TableRow>
                   ) : (
-                    categories.map((category) => (
-                      <TableRow key={category._id}>
-                        <TableCell className="font-medium">{category.name}</TableCell>
-                        <TableCell>{category.slug}</TableCell>
+                    categories.map((cat) => (
+                      <TableRow key={cat._id}>
+                        <TableCell className="font-medium">{cat.name}</TableCell>
+                        <TableCell>{cat.slug}</TableCell>
                         <TableCell>
-                          <Badge variant={category.isActive !== false ? "default" : "secondary"}>
-                            {category.isActive !== false ? "Active" : "Inactive"}
+                          <Badge variant={cat.isActive !== false ? "default" : "secondary"}>
+                            {cat.isActive !== false ? "Active" : "Inactive"}
                           </Badge>
                         </TableCell>
                         <TableCell className="text-right">
-                          <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                              <Button variant="ghost" size="icon">
-                                <MoreHorizontal className="h-4 w-4" />
-                              </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end">
-                              <DropdownMenuItem onClick={() => openDialog(category)}>
-                                <Pencil className="mr-2 h-4 w-4" />
-                                Edit
-                              </DropdownMenuItem>
-                              <DropdownMenuItem
-                                onClick={() => openDeleteDialog(category)}
-                                className="text-red-600"
-                              >
-                                <Trash2 className="mr-2 h-4 w-4" />
-                                Delete
-                              </DropdownMenuItem>
-                            </DropdownMenuContent>
-                          </DropdownMenu>
+                          <div className="flex justify-end gap-1">
+                            <Button variant="ghost" size="icon" onClick={() => openDialog(cat)}>
+                              <Pencil className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="text-red-600"
+                              onClick={() => setDelTarget(cat)}
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </div>
                         </TableCell>
                       </TableRow>
                     ))
@@ -237,15 +205,15 @@ export default function Categories() {
                     <PaginationContent>
                       <PaginationItem>
                         <PaginationPrevious
-                          onClick={() => setPage((p) => Math.max(1, p - 1))}
-                          disabled={page === 1}
+                          onClick={() => setCurPage((p) => Math.max(1, p - 1))}
+                          disabled={curPage === 1}
                         />
                       </PaginationItem>
                       {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
                         <PaginationItem key={p}>
                           <PaginationLink
-                            onClick={() => setPage(p)}
-                            isActive={p === page}
+                            onClick={() => setCurPage(p)}
+                            isActive={p === curPage}
                           >
                             {p}
                           </PaginationLink>
@@ -253,8 +221,8 @@ export default function Categories() {
                       ))}
                       <PaginationItem>
                         <PaginationNext
-                          onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-                          disabled={page === totalPages}
+                          onClick={() => setCurPage((p) => Math.min(totalPages, p + 1))}
+                          disabled={curPage === totalPages}
                         />
                       </PaginationItem>
                     </PaginationContent>
@@ -266,24 +234,24 @@ export default function Categories() {
         </CardContent>
       </Card>
 
-      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+      <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>{selectedCategory ? "Edit Category" : "Add Category"}</DialogTitle>
+            <DialogTitle>{editing ? "Edit Category" : "Add Category"}</DialogTitle>
             <DialogDescription>
-              {selectedCategory ? "Update category details" : "Add a new category"}
+              {editing ? "Update category details" : "Add a new category"}
             </DialogDescription>
           </DialogHeader>
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="name">Name</Label>
+              <Label htmlFor="name">Name <span className="text-destructive">*</span></Label>
               <Input id="name" {...register("name")} placeholder="Enter category name" />
               {errors.name && (
                 <p className="text-sm text-red-500">{errors.name.message}</p>
               )}
             </div>
             <div className="space-y-2">
-              <Label htmlFor="slug">Slug</Label>
+              <Label htmlFor="slug">Slug <span className="text-destructive">*</span></Label>
               <Input id="slug" {...register("slug")} placeholder="Enter slug" />
               {errors.slug && (
                 <p className="text-sm text-red-500">{errors.slug.message}</p>
@@ -299,32 +267,32 @@ export default function Categories() {
               />
             </div>
             <DialogFooter>
-              <Button type="button" variant="outline" onClick={() => setDialogOpen(false)}>
+              <Button type="button" variant="outline" onClick={() => setOpen(false)}>
                 Cancel
               </Button>
-              <Button type="submit" disabled={isMutating}>
-                {isMutating && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                {selectedCategory ? "Update" : "Create"}
+              <Button type="submit" disabled={busy}>
+                {busy && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                {editing ? "Update" : "Create"}
               </Button>
             </DialogFooter>
           </form>
         </DialogContent>
       </Dialog>
 
-      <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+      <Dialog open={!!delTarget} onOpenChange={() => setDelTarget(null)}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Delete Category</DialogTitle>
             <DialogDescription>
-              Are you sure you want to delete {selectedCategory?.name}? This action cannot be undone.
+              Are you sure you want to delete {delTarget?.name}? This action cannot be undone.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setDeleteDialogOpen(false)}>
+            <Button variant="outline" onClick={() => setDelTarget(null)}>
               Cancel
             </Button>
-            <Button variant="destructive" onClick={handleDelete} disabled={isMutating}>
-              {isMutating && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+            <Button variant="destructive" onClick={confirmDelete} disabled={busy}>
+              {busy && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               Delete
             </Button>
           </DialogFooter>
