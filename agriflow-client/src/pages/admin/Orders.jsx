@@ -15,7 +15,7 @@ import { toast } from "sonner";
 import { Search, Eye, ChevronLeft, ChevronRight, Plus, X, UserCheck, ShoppingCart } from "lucide-react";
 import { orderService } from "@/services/order.service";
 import { productService } from "@/services/product.service";
-import { adminService } from "@/services/admin.service";
+import adminService from "@/services/admin.service";
 import { format } from "date-fns";
 
 const ORDERS_PER_PAGE = 10;
