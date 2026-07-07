@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Sprout, Loader2 } from "lucide-react";
+import { Sprout, Loader2, ExternalLink } from "lucide-react";
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
 import { loginSchema } from "@/utils/validators";
@@ -112,6 +112,17 @@ export default function AdminLogin() {
             <p>Email: admin@test.com</p>
             <p>Password: 123456</p>
           </div>
+          <p className="mt-4 text-center text-sm text-muted-foreground">
+            <a
+              href="https://www.loom.com/share/73237d34a9b646f09d21a6c275c7d814"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1 font-medium text-green-600 hover:underline"
+            >
+              <ExternalLink className="h-3.5 w-3.5" />
+              Watch Demo Video
+            </a>
+          </p>
         </CardContent>
       </Card>
     </div>
