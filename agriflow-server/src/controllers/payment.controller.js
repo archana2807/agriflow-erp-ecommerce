@@ -7,7 +7,7 @@ import Order from "../models/order.model.js";
  */
 export const createPayment = async (req, res, next) => {
   try {
-    const { invoiceId, amountPaid, paymentMethod } = req.validatedBody;
+    const { invoiceId, amountPaid, paymentMethod, notes } = req.validatedBody;
 
     const invoice = await Invoice.findOne({
       _id: invoiceId,
@@ -46,6 +46,7 @@ export const createPayment = async (req, res, next) => {
       paymentMethod: paymentMethod || "CASH",
       remainingAmount: remainingAmount < 0 ? 0 : remainingAmount,
       status,
+      notes,
       createdBy: req.user.id,
     });
 

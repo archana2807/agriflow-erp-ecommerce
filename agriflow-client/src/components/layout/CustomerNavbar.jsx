@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { X, LogOut, User, ShoppingBag, Heart, ChevronDown, Menu } from "lucide-react";
+import { X, LogOut, User, ShoppingBag, Heart, ChevronDown, Menu, Phone, Tractor, ChevronRight } from "lucide-react";
 import { useCustomerAuth } from "@/contexts/CustomerAuthContext";
 import { useCart, useWishlist } from "@/hooks/useQueries";
 import {
@@ -50,7 +50,7 @@ export default function CustomerNavbar({ onCartClick }) {
         <div className="max-w-[1200px] mx-auto px-4 h-8 flex items-center justify-between">
           <div className="flex items-center gap-4">
             <span className="flex items-center gap-1.5">
-              <i className="fa-solid fa-phone" style={{ fontSize: "9px" }}></i>
+              <Phone className="w-3 h-3" />
               089896 96971
             </span>
             <span className="opacity-50">|</span>
@@ -72,8 +72,8 @@ export default function CustomerNavbar({ onCartClick }) {
 
           {/* Logo */}
           <Link to="/" className="flex items-center shrink-0 gap-2 no-underline">
-            <div className="w-10 h-10 rounded-lg flex items-center justify-center bg-green-600">
-              <i className="fa-solid fa-tractor text-white text-lg"></i>
+            <div className="w-10 h-10 rounded-lg flex items-center justify-center bg-green-600 ring-1 ring-green-500/20">
+              <Tractor className="w-5 h-5 text-white" />
             </div>
             <div className="hidden sm:block leading-tight">
               <span className="text-base font-bold block text-gray-900">Ambika Krishi</span>
@@ -123,7 +123,7 @@ export default function CustomerNavbar({ onCartClick }) {
             {user ? (
               <DropdownMenu>
                 <DropdownMenuTrigger className="flex items-center gap-2 px-3 py-1 rounded-lg hover:bg-gray-50 transition-colors cursor-pointer outline-none">
-                  <div className="w-8 h-8 rounded-full bg-green-600 text-white flex items-center justify-center text-xs font-bold">
+                  <div className="w-8 h-8 rounded-full bg-green-600 text-white flex items-center justify-center text-xs font-bold ring-2 ring-green-500/20">
                     {initials}
                   </div>
                   <div className="hidden lg:flex flex-col items-start">
@@ -132,7 +132,7 @@ export default function CustomerNavbar({ onCartClick }) {
                   </div>
                   <ChevronDown className="h-4 w-4 text-gray-400 hidden lg:block" />
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-56">
+                <DropdownMenuContent align="end" className="w-56 shadow-xl border border-gray-100">
                   <div className="px-3 py-2 border-b border-gray-100">
                     <p className="text-sm font-medium text-gray-900">{user.name}</p>
                     <p className="text-xs text-gray-500 truncate">{user.email}</p>
@@ -178,7 +178,7 @@ export default function CustomerNavbar({ onCartClick }) {
                 <Link
                   to={link.path}
                   onClick={(e) => handleNavClick(e, link)}
-                  className="text-sm font-medium text-gray-700 hover:text-green-600 transition-colors no-underline"
+                  className="text-sm font-medium text-gray-700 hover:text-green-600 transition-colors no-underline relative after:absolute after:bottom-0 after:left-0 after:right-0 after:h-0.5 after:bg-green-600 after:scale-x-0 hover:after:scale-x-100 after:transition-transform after:origin-left"
                 >
                   {link.name}
                 </Link>
@@ -193,7 +193,7 @@ export default function CustomerNavbar({ onCartClick }) {
         <div className="fixed inset-0 bg-black/50 z-50 lg:hidden" onClick={() => setMobileNavOpen(false)} />
       )}
       <div
-        className={`fixed top-0 left-0 h-full w-72 bg-white z-50 transform transition-transform duration-300 lg:hidden ${ mobileNavOpen ? "translate-x-0" : "-translate-x-full"
+        className={`fixed top-0 left-0 h-full w-72 bg-white z-50 shadow-2xl transform transition-transform duration-300 lg:hidden ${ mobileNavOpen ? "translate-x-0" : "-translate-x-full"
           }`}
       >
         <div className="flex items-center justify-between p-4 border-b border-gray-100">
@@ -231,7 +231,7 @@ export default function CustomerNavbar({ onCartClick }) {
                   className="flex items-center justify-between px-3 py-2.5 text-sm text-gray-700 hover:bg-gray-50 rounded-lg no-underline"
                 >
                   {link.name}
-                  <i className="fa-solid fa-chevron-right text-xs text-gray-300"></i>
+                  <ChevronRight className="w-3 h-3 text-gray-300" />
                 </Link>
               </li>
             ))}

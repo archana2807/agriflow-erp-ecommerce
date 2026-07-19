@@ -16,6 +16,7 @@ import { productService } from "@/services/product.service";
 import { categoryService } from "@/services/category.service";
 import { brandService } from "@/services/brand.service";
 import { uploadService } from "@/services/upload.service";
+import { getImageUrl } from "@/lib/utils";
 
 const PRODUCTS_PER_PAGE = 12;
 
@@ -60,15 +61,16 @@ function ProductForm({ product, onSubmit, isLoading }) {
         const formData = new FormData();
         formData.append("image", file);
         const response = await uploadService.uploadImage(formData);
-        return response.data.data || response.data;
+        return response.url;
       });
       const uploadedImages = await Promise.all(uploadPromises);
       setImages((prev) => [...prev, ...uploadedImages].slice(0, 6));
       toast.success(`${files.length} image(s) uploaded`);
     } catch (error) {
-      toast.error("Image upload failed");
+      toast.error(error.message || "Image upload failed");
     } finally {
       setUploadingImages(false);
+      e.target.value = "";
     }
   };
 
@@ -178,7 +180,7 @@ function ProductForm({ product, onSubmit, isLoading }) {
         <div className="flex flex-wrap gap-3">
           {images.map((img, idx) => (
             <div key={idx} className="relative group h-20 w-20 rounded-lg overflow-hidden border border-slate-200">
-              <img src={img.url || img} alt="" className="h-full w-full object-cover" />
+              <img src={getImageUrl(typeof img === "string" ? img : img.url)} alt="" className="h-full w-full object-cover" />
               <button type="button" onClick={() => handleRemoveImage(idx)} className="absolute inset-0 flex items-center justify-center bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity">
                 <X className="h-4 w-4 text-white" />
               </button>
@@ -315,7 +317,7 @@ export default function Products() {
                     <TableCell className="pl-5 py-4">
                       <div className="flex items-center gap-3">
                         <div className="h-10 w-10 rounded-lg bg-slate-100 flex items-center justify-center overflow-hidden">
-                          {product.images?.[0]?.url ? <img src={product.images[0].url} alt="" className="h-full w-full object-cover" /> : <Package className="h-5 w-5 text-slate-400" />}
+                          {product.images?.[0] ? <img src={getImageUrl(typeof product.images[0] === "string" ? product.images[0] : product.images[0].url)} alt="" className="h-full w-full object-cover" /> : <Package className="h-5 w-5 text-slate-400" />}
                         </div>
                         <div>
                           <p className="font-medium text-slate-900 text-sm">{product.name}</p>

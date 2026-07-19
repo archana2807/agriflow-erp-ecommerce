@@ -22,7 +22,7 @@ import { Separator } from "@/components/ui/separator";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
-import { formatCurrency } from "@/lib/utils";
+import { formatCurrency, getImageUrl } from "@/lib/utils";
 import {
   useShopProduct,
   useAddToCart,
@@ -30,6 +30,7 @@ import {
   useRemoveFromWishlist,
 } from "@/hooks/useQueries";
 import { useCustomerAuth } from "@/contexts/CustomerAuthContext";
+import ProductImage from "@/components/common/ProductImage";
 
 function ProductDetailsSkeleton() {
   return (
@@ -138,8 +139,8 @@ export default function ProductDetails() {
       : 0;
 
   const images = product.images?.length > 0
-    ? product.images.map((img) => img?.url || img)
-    : ["/placeholder.png"];
+    ? product.images.map((img) => getImageUrl(img?.url || img))
+    : ["https://placehold.co/400x400?text=No+Image&font=roboto"];
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6">
@@ -170,7 +171,7 @@ export default function ProductDetails() {
             className="relative border border-gray-200 rounded-2xl overflow-hidden bg-gray-50 group cursor-zoom-in"
             onClick={() => setImageZoomed(!imageZoomed)}
           >
-            <img
+            <ProductImage
               src={images[selectedImage]}
               alt={product.name}
               className={`w-full aspect-square object-contain p-6 transition-transform duration-300 ${
@@ -202,7 +203,7 @@ export default function ProductDetails() {
                       : "border-gray-200 hover:border-gray-300"
                   }`}
                 >
-                  <img src={img} alt="" className="w-full h-full object-cover" />
+                  <ProductImage src={img} alt="" className="w-full h-full object-cover" />
                 </button>
               ))}
             </div>

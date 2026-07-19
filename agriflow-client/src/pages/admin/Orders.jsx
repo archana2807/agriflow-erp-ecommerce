@@ -12,7 +12,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
-import { Search, Eye, ChevronLeft, ChevronRight, Plus, X, UserCheck, ShoppingCart } from "lucide-react";
+import { Search, Eye, ChevronLeft, ChevronRight, Plus, X, UserCheck, ShoppingCart, Phone, User, CreditCard, Check } from "lucide-react";
 import { orderService } from "@/services/order.service";
 import { productService } from "@/services/product.service";
 import adminService from "@/services/admin.service";
@@ -42,9 +42,12 @@ function WalkInOrderDialog({ open, onOpenChange }) {
   const [paymentAmount, setPaymentAmount] = useState("");
   const [notes, setNotes] = useState("");
 
-  const { data: customerSearchRes } = useQuery({
+  const { data: customerSearchRes, isLoading: isSearchingCustomer } = useQuery({
     queryKey: ["admin-customer-search", customerPhone],
-    queryFn: () => adminService.customers.getAll({ search: customerPhone, limit: 5 }),
+    queryFn: () => {
+      const normalized = customerPhone.replace(/\D/g, "").replace(/^91/, "");
+      return adminService.customers.getAll({ search: normalized, limit: 5 });
+    },
     enabled: customerPhone.length >= 3,
   });
 
@@ -61,7 +64,21 @@ function WalkInOrderDialog({ open, onOpenChange }) {
       toast.success("Walk-in customer created");
       setStep(2);
     },
-    onError: (e) => toast.error(e.message || "Failed to create customer"),
+    onError: async (e) => {
+      if (e.status === 409) {
+        try {
+          const searchRes = await adminService.customers.getAll({ search: customerPhone, limit: 5 });
+          const match = searchRes?.customers?.find((c) => c.phone === customerPhone);
+          if (match) {
+            setSelectedCustomer(match);
+            toast.success("Existing customer found and selected");
+            setStep(2);
+            return;
+          }
+        } catch {}
+      }
+      toast.error(e.message || "Failed to create customer");
+    },
   });
 
   const createOrderMut = useMutation({
@@ -83,7 +100,6 @@ function WalkInOrderDialog({ open, onOpenChange }) {
     setCustomerPhone("");
     setCustomerName("");
     setSelectedCustomer(null);
-    setIsWalkIn(true);
     setItems([]);
     setProductSearch("");
     setPaymentMethod("CASH");
@@ -180,6 +196,12 @@ function WalkInOrderDialog({ open, onOpenChange }) {
     createOrderMut.mutate(payload);
   };
 
+  const stepConfig = [
+    { num: 1, label: "Customer", icon: User },
+    { num: 2, label: "Products", icon: ShoppingCart },
+    { num: 3, label: "Payment", icon: CreditCard },
+  ];
+
   return (
     <Dialog open={open} onOpenChange={(v) => { if (!v) resetForm(); onOpenChange(v); }}>
       <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto border-slate-200">
@@ -187,80 +209,132 @@ function WalkInOrderDialog({ open, onOpenChange }) {
           <DialogTitle className="text-lg font-semibold text-slate-900">Create Walk-in Order</DialogTitle>
         </DialogHeader>
 
-        {step === 1 && (
-          <div className="space-y-4 pt-2">
-            <p className="text-sm text-slate-500">Search for an existing customer by phone, or create a new walk-in customer.</p>
+        {/* Step Indicator */}
+        <div className="flex items-center justify-center gap-0 py-4">
+          {stepConfig.map((s, idx) => {
+            const StepIcon = s.icon;
+            const isActive = step === s.num;
+            const isComplete = step > s.num;
+            return (
+              <div key={s.num} className="flex items-center">
+                <div className="flex flex-col items-center gap-1.5">
+                  <div className={`flex items-center justify-center h-9 w-9 rounded-full text-sm font-medium transition-all duration-200 ${
+                    isComplete ? "bg-emerald-600 text-white" : isActive ? "bg-slate-900 text-white shadow-md shadow-slate-900/20" : "bg-slate-100 text-slate-400"
+                  }`}>
+                    {isComplete ? <Check className="h-4 w-4" /> : <StepIcon className="h-4 w-4" />}
+                  </div>
+                  <span className={`text-xs font-medium ${isActive ? "text-slate-900" : "text-slate-400"}`}>{s.label}</span>
+                </div>
+                {idx < stepConfig.length - 1 && (
+                  <div className={`w-16 h-0.5 mx-2 mt-[-18px] rounded-full transition-colors ${step > s.num ? "bg-emerald-600" : "bg-slate-100"}`} />
+                )}
+              </div>
+            );
+          })}
+        </div>
 
-            <div className="space-y-1.5">
-              <Label className="text-sm font-medium text-slate-700">Phone Number *</Label>
-              <Input
-                value={customerPhone}
-                onChange={(e) => {
-                  setCustomerPhone(e.target.value);
-                  setSelectedCustomer(null);
-                }}
-                placeholder="Enter phone number to search"
-                className="border-slate-200 focus-visible:ring-slate-400/20"
-              />
+        {step === 1 && (
+          <div className="space-y-5 pt-1">
+            <div className="space-y-2">
+              <Label className="text-sm font-semibold text-slate-700">Phone Number</Label>
+              <div className="relative">
+                <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+                <Input
+                  value={customerPhone}
+                  onChange={(e) => {
+                    setCustomerPhone(e.target.value);
+                    setSelectedCustomer(null);
+                  }}
+                  placeholder="Type phone number to search existing customer..."
+                  className="pl-9 border-slate-200 focus-visible:ring-emerald-500/20 focus-visible:border-emerald-400 h-11"
+                />
+              </div>
+              <p className="text-xs text-slate-400">Search by name or phone number</p>
             </div>
 
+            {isSearchingCustomer && customerPhone.length >= 3 && !selectedCustomer && (
+              <div className="flex items-center gap-2.5 text-sm text-slate-500 py-3 px-4 bg-slate-50 rounded-lg">
+                <div className="h-4 w-4 animate-spin rounded-full border-2 border-slate-300 border-t-emerald-600" />
+                Searching customers...
+              </div>
+            )}
+
             {customers.length > 0 && !selectedCustomer && (
-              <div className="rounded-lg border border-slate-200 divide-y divide-slate-100 max-h-48 overflow-y-auto">
-                {customers.map((c) => (
-                  <button
-                    key={c._id}
-                    onClick={() => handleSelectCustomer(c)}
-                    className="w-full flex items-center justify-between p-3 hover:bg-slate-50 transition-colors text-left"
-                  >
-                    <div>
-                      <p className="text-sm font-medium text-slate-900">{c.name}</p>
-                      <p className="text-xs text-slate-500">{c.phone} {c.isWalkIn ? "(Walk-in)" : ""}</p>
-                    </div>
-                    <Badge variant="outline" className={
-                      c.isWalkIn
-                        ? "text-orange-700 bg-orange-50 border-orange-200"
-                        : "text-emerald-700 bg-emerald-50 border-emerald-200"
-                    }>
-                      {c.isWalkIn ? "Walk-in" : "Registered"}
-                    </Badge>
-                  </button>
-                ))}
+              <div className="space-y-1.5">
+                <p className="text-xs font-medium text-slate-500 uppercase tracking-wide">Matching Customers</p>
+                <div className="rounded-xl border border-slate-200 divide-y divide-slate-100 max-h-52 overflow-y-auto">
+                  {customers.map((c) => (
+                    <button
+                      key={c._id}
+                      onClick={() => handleSelectCustomer(c)}
+                      className="w-full flex items-center justify-between p-3.5 hover:bg-emerald-50/50 transition-colors text-left group"
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className="flex items-center justify-center h-9 w-9 rounded-full bg-slate-100 group-hover:bg-emerald-100 transition-colors">
+                          <User className="h-4 w-4 text-slate-500 group-hover:text-emerald-600" />
+                        </div>
+                        <div>
+                          <p className="text-sm font-medium text-slate-900">{c.name}</p>
+                          <p className="text-xs text-slate-500">{c.phone}</p>
+                        </div>
+                      </div>
+                      <Badge variant="outline" className={
+                        c.isWalkIn
+                          ? "text-orange-700 bg-orange-50 border-orange-200"
+                          : "text-emerald-700 bg-emerald-50 border-emerald-200"
+                      }>
+                        {c.isWalkIn ? "Walk-in" : "Registered"}
+                      </Badge>
+                    </button>
+                  ))}
+                </div>
               </div>
             )}
 
             {selectedCustomer && (
-              <div className="rounded-lg bg-emerald-50 border border-emerald-200 p-3 flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-emerald-900">{selectedCustomer.name}</p>
-                  <p className="text-xs text-emerald-700">{selectedCustomer.phone}</p>
+              <div className="rounded-xl bg-emerald-50 border border-emerald-200 p-4 flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="flex items-center justify-center h-10 w-10 rounded-full bg-emerald-100">
+                    <Check className="h-5 w-5 text-emerald-600" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-semibold text-emerald-900">{selectedCustomer.name}</p>
+                    <p className="text-xs text-emerald-600">{selectedCustomer.phone}</p>
+                  </div>
                 </div>
-                <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => { setSelectedCustomer(null); setCustomerPhone(""); }}>
+                <Button variant="ghost" size="icon" className="h-8 w-8 text-emerald-600 hover:text-red-600 hover:bg-red-50 rounded-lg" onClick={() => { setSelectedCustomer(null); setCustomerPhone(""); }}>
                   <X className="h-4 w-4" />
                 </Button>
               </div>
             )}
 
-            {!selectedCustomer && customerPhone.length >= 10 && (
-              <div className="space-y-3 rounded-lg border border-dashed border-slate-300 p-4">
-                <p className="text-sm font-medium text-slate-700">Create Walk-in Customer</p>
-                <div className="space-y-1.5">
-                  <Label className="text-sm font-medium text-slate-700">Name *</Label>
+            {!selectedCustomer && customerPhone.length >= 10 && !isSearchingCustomer && customers.length === 0 && (
+              <div className="space-y-3 rounded-xl border border-dashed border-slate-300 p-5 bg-slate-50/50">
+                <div className="flex items-center gap-2">
+                  <div className="flex items-center justify-center h-7 w-7 rounded-full bg-slate-200">
+                    <User className="h-3.5 w-3.5 text-slate-600" />
+                  </div>
+                  <p className="text-sm font-semibold text-slate-700">New Customer</p>
+                </div>
+                <p className="text-xs text-slate-500 -mt-1">No customer found with this number. Create a new walk-in customer.</p>
+                <div className="space-y-2">
+                  <Label className="text-sm font-medium text-slate-700">Customer Name</Label>
                   <Input
                     value={customerName}
                     onChange={(e) => setCustomerName(e.target.value)}
-                    placeholder="Customer name"
-                    className="border-slate-200 focus-visible:ring-slate-400/20"
+                    placeholder="Enter customer name"
+                    className="border-slate-200 focus-visible:ring-emerald-500/20 focus-visible:border-emerald-400"
                   />
                 </div>
-                <Button onClick={handleCreateCustomer} disabled={createCustomerMut.isPending} className="bg-slate-900 hover:bg-slate-800 text-white">
-                  {createCustomerMut.isPending ? "Creating..." : "Create Walk-in Customer"}
+                <Button onClick={handleCreateCustomer} disabled={createCustomerMut.isPending} className="bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm">
+                  {createCustomerMut.isPending ? "Creating..." : "Create & Continue"}
                 </Button>
               </div>
             )}
 
-            <DialogFooter className="pt-2">
-              <Button variant="outline" onClick={() => onOpenChange(false)} className="border-slate-200">Cancel</Button>
-              <Button onClick={() => { if (selectedCustomer) setStep(2); else toast.error("Select or create a customer"); }} className="bg-slate-900 hover:bg-slate-800 text-white">
+            <DialogFooter className="pt-3 border-t border-slate-100">
+              <Button variant="outline" onClick={() => onOpenChange(false)} className="border-slate-200 text-slate-600">Cancel</Button>
+              <Button onClick={() => { if (selectedCustomer) setStep(2); else toast.error("Select or create a customer"); }} className="bg-slate-900 hover:bg-slate-800 text-white shadow-sm">
                 Next: Add Products
               </Button>
             </DialogFooter>
@@ -268,43 +342,48 @@ function WalkInOrderDialog({ open, onOpenChange }) {
         )}
 
         {step === 2 && (
-          <div className="space-y-4 pt-2">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-slate-900">{selectedCustomer?.name}</p>
-                <p className="text-xs text-slate-500">{selectedCustomer?.phone}</p>
+          <div className="space-y-5 pt-1">
+            <div className="flex items-center justify-between rounded-xl bg-slate-50 border border-slate-200 p-3.5">
+              <div className="flex items-center gap-3">
+                <div className="flex items-center justify-center h-9 w-9 rounded-full bg-emerald-100">
+                  <User className="h-4 w-4 text-emerald-600" />
+                </div>
+                <div>
+                  <p className="text-sm font-semibold text-slate-900">{selectedCustomer?.name}</p>
+                  <p className="text-xs text-slate-500">{selectedCustomer?.phone}</p>
+                </div>
               </div>
-              <Button variant="ghost" size="sm" onClick={() => setStep(1)} className="text-slate-500">
-                Change Customer
+              <Button variant="ghost" size="sm" onClick={() => setStep(1)} className="text-slate-500 hover:text-slate-700 text-xs">
+                Change
               </Button>
             </div>
 
-            <div className="space-y-1.5">
-              <Label className="text-sm font-medium text-slate-700">Search Products</Label>
+            <div className="space-y-2">
+              <Label className="text-sm font-semibold text-slate-700">Search Products</Label>
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
                 <Input
                   value={productSearch}
                   onChange={(e) => setProductSearch(e.target.value)}
                   placeholder="Search by name or SKU..."
-                  className="pl-9 border-slate-200 focus-visible:ring-slate-400/20"
+                  className="pl-9 border-slate-200 focus-visible:ring-emerald-500/20 focus-visible:border-emerald-400 h-11"
                 />
               </div>
             </div>
 
             {products.length > 0 && productSearch && (
-              <div className="rounded-lg border border-slate-200 divide-y divide-slate-100 max-h-48 overflow-y-auto">
+              <div className="rounded-xl border border-slate-200 divide-y divide-slate-100 max-h-48 overflow-y-auto">
                 {products.map((p) => (
                   <button
                     key={p._id}
                     onClick={() => handleAddProduct(p)}
-                    className="w-full flex items-center justify-between p-3 hover:bg-slate-50 transition-colors text-left"
+                    className="w-full flex items-center justify-between p-3.5 hover:bg-emerald-50/50 transition-colors text-left group"
                   >
                     <div>
-                      <p className="text-sm font-medium text-slate-900">{p.name}</p>
+                      <p className="text-sm font-medium text-slate-900 group-hover:text-emerald-700 transition-colors">{p.name}</p>
                       <p className="text-xs text-slate-500">SKU: {p.sku || "—"} | Stock: {p.stock ?? 0} {p.unit || "kg"}</p>
                     </div>
-                    <p className="text-sm font-medium text-slate-900">₹{p.sellingPrice || p.price}</p>
+                    <span className="text-sm font-semibold text-slate-900 bg-slate-100 group-hover:bg-emerald-100 px-2.5 py-1 rounded-md transition-colors">₹{p.sellingPrice || p.price}</span>
                   </button>
                 ))}
               </div>
@@ -312,58 +391,67 @@ function WalkInOrderDialog({ open, onOpenChange }) {
 
             {items.length > 0 && (
               <div className="space-y-2">
-                <Label className="text-sm font-medium text-slate-700">Order Items ({items.length})</Label>
-                <div className="rounded-lg border border-slate-200 divide-y divide-slate-100">
+                <p className="text-xs font-medium text-slate-500 uppercase tracking-wide">Order Items ({items.length})</p>
+                <div className="rounded-xl border border-slate-200 divide-y divide-slate-100">
                   {items.map((item) => (
-                    <div key={item.productId} className="flex items-center gap-3 p-3">
+                    <div key={item.productId} className="flex items-center gap-4 p-4">
                       <div className="flex-1 min-w-0">
                         <p className="text-sm font-medium text-slate-900 truncate">{item.name}</p>
-                        <p className="text-xs text-slate-500">₹{item.price} per {item.unit}</p>
+                        <p className="text-xs text-slate-500">₹{item.price} / {item.unit}</p>
                       </div>
-                      <div className="flex items-center gap-2">
-                        <Input
-                          type="number"
-                          value={item.quantity}
-                          onChange={(e) => handleUpdateQuantity(item.productId, Number(e.target.value))}
-                          className="w-16 h-8 text-center border-slate-200 text-sm"
-                          min="1"
-                        />
+                      <div className="flex items-center gap-3">
+                        <div className="flex items-center gap-1">
+                          <Button variant="outline" size="icon" className="h-7 w-7 border-slate-200 text-slate-500" onClick={() => handleUpdateQuantity(item.productId, item.quantity - 1)}>
+                            <span className="text-xs">−</span>
+                          </Button>
+                          <Input
+                            type="number"
+                            value={item.quantity}
+                            onChange={(e) => handleUpdateQuantity(item.productId, Number(e.target.value))}
+                            className="w-14 h-7 text-center border-slate-200 text-sm font-medium"
+                            min="1"
+                          />
+                          <Button variant="outline" size="icon" className="h-7 w-7 border-slate-200 text-slate-500" onClick={() => handleUpdateQuantity(item.productId, item.quantity + 1)}>
+                            <span className="text-xs">+</span>
+                          </Button>
+                        </div>
                         <Input
                           type="number"
                           value={item.price}
                           onChange={(e) => handleUpdatePrice(item.productId, e.target.value)}
-                          className="w-20 h-8 text-center border-slate-200 text-sm"
+                          className="w-20 h-7 text-center border-slate-200 text-sm"
                           min="0"
                         />
-                        <p className="text-sm font-medium text-slate-900 w-20 text-right">
+                        <p className="text-sm font-semibold text-slate-900 w-20 text-right">
                           ₹{(item.price * item.quantity).toLocaleString("en-IN")}
                         </p>
-                        <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-red-600" onClick={() => handleRemoveItem(item.productId)}>
+                        <button onClick={() => handleRemoveItem(item.productId)} className="p-1 text-slate-300 hover:text-red-500 transition-colors rounded-md hover:bg-red-50">
                           <X className="h-4 w-4" />
-                        </Button>
+                        </button>
                       </div>
                     </div>
                   ))}
                 </div>
-                <div className="flex justify-end pt-2 border-t border-slate-100">
+                <div className="flex justify-end pt-3">
                   <div className="text-right">
-                    <p className="text-xs text-slate-500">Total</p>
-                    <p className="text-lg font-bold text-slate-900">₹{totalAmount.toLocaleString("en-IN")}</p>
+                    <p className="text-xs text-slate-500 mb-0.5">Total</p>
+                    <p className="text-xl font-bold text-slate-900">₹{totalAmount.toLocaleString("en-IN")}</p>
                   </div>
                 </div>
               </div>
             )}
 
             {items.length === 0 && (
-              <div className="text-center py-8 text-slate-400">
-                <ShoppingCart className="h-8 w-8 mx-auto mb-2" />
-                <p className="text-sm">Search and add products to the order</p>
+              <div className="text-center py-12 text-slate-400 bg-slate-50 rounded-xl border border-dashed border-slate-200">
+                <ShoppingCart className="h-10 w-10 mx-auto mb-3 text-slate-300" />
+                <p className="text-sm font-medium text-slate-500">No products added yet</p>
+                <p className="text-xs text-slate-400 mt-1">Search and add products to build the order</p>
               </div>
             )}
 
-            <DialogFooter className="pt-2">
-              <Button variant="outline" onClick={() => setStep(1)} className="border-slate-200">Back</Button>
-              <Button onClick={() => { if (items.length === 0) { toast.error("Add at least one product"); } else setStep(3); }} className="bg-slate-900 hover:bg-slate-800 text-white">
+            <DialogFooter className="pt-3 border-t border-slate-100">
+              <Button variant="outline" onClick={() => setStep(1)} className="border-slate-200 text-slate-600">Back</Button>
+              <Button onClick={() => { if (items.length === 0) { toast.error("Add at least one product"); } else setStep(3); }} className="bg-slate-900 hover:bg-slate-800 text-white shadow-sm">
                 Next: Payment
               </Button>
             </DialogFooter>
@@ -371,20 +459,25 @@ function WalkInOrderDialog({ open, onOpenChange }) {
         )}
 
         {step === 3 && (
-          <div className="space-y-4 pt-2">
-            <div className="rounded-lg bg-slate-50 border border-slate-200 p-4">
-              <div className="flex items-center justify-between mb-2">
-                <p className="text-sm font-medium text-slate-700">Order Summary</p>
-                <Button variant="ghost" size="sm" onClick={() => setStep(2)} className="text-slate-500">Edit Items</Button>
+          <div className="space-y-5 pt-1">
+            <div className="rounded-xl bg-gradient-to-br from-slate-50 to-slate-100 border border-slate-200 p-5">
+              <div className="flex items-center justify-between mb-3">
+                <p className="text-xs font-medium text-slate-500 uppercase tracking-wide">Order Summary</p>
+                <Button variant="ghost" size="sm" onClick={() => setStep(2)} className="text-slate-500 hover:text-slate-700 text-xs h-7 px-2">Edit Items</Button>
               </div>
-              <p className="text-xs text-slate-500 mb-1">{selectedCustomer?.name} | {items.length} item(s)</p>
-              <p className="text-xl font-bold text-slate-900">₹{totalAmount.toLocaleString("en-IN")}</p>
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-semibold text-slate-900">{selectedCustomer?.name}</p>
+                  <p className="text-xs text-slate-500 mt-0.5">{items.length} item{items.length !== 1 ? "s" : ""}</p>
+                </div>
+                <p className="text-2xl font-bold text-slate-900">₹{totalAmount.toLocaleString("en-IN")}</p>
+              </div>
             </div>
 
-            <div className="space-y-1.5">
-              <Label className="text-sm font-medium text-slate-700">Payment Method</Label>
+            <div className="space-y-2">
+              <Label className="text-sm font-semibold text-slate-700">Payment Method</Label>
               <Select value={paymentMethod} onValueChange={setPaymentMethod}>
-                <SelectTrigger className="border-slate-200"><SelectValue /></SelectTrigger>
+                <SelectTrigger className="border-slate-200 h-11"><SelectValue /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="CASH">Cash</SelectItem>
                   <SelectItem value="CARD">Card</SelectItem>
@@ -394,38 +487,38 @@ function WalkInOrderDialog({ open, onOpenChange }) {
               </Select>
             </div>
 
-            <div className="space-y-1.5">
-              <Label className="text-sm font-medium text-slate-700">Amount Paid</Label>
+            <div className="space-y-2">
+              <Label className="text-sm font-semibold text-slate-700">Amount Paid</Label>
               <Input
                 type="number"
                 value={paymentAmount}
                 onChange={(e) => setPaymentAmount(e.target.value)}
                 placeholder={`0 (unpaid) to ${totalAmount} (full)`}
-                className="border-slate-200 focus-visible:ring-slate-400/20"
+                className="border-slate-200 focus-visible:ring-emerald-500/20 focus-visible:border-emerald-400 h-11"
                 min="0"
                 max={totalAmount}
               />
-              <div className="flex gap-2 mt-1">
-                <Button variant="outline" size="sm" className="border-slate-200 text-xs" onClick={() => setPaymentAmount("0")}>Unpaid</Button>
-                <Button variant="outline" size="sm" className="border-slate-200 text-xs" onClick={() => setPaymentAmount(String(Math.round(totalAmount / 2)))}>Half</Button>
-                <Button variant="outline" size="sm" className="border-slate-200 text-xs" onClick={() => setPaymentAmount(String(totalAmount))}>Full</Button>
+              <div className="flex gap-2">
+                <Button variant="outline" size="sm" className="border-slate-200 text-xs text-slate-600 hover:bg-slate-50" onClick={() => setPaymentAmount("0")}>Unpaid</Button>
+                <Button variant="outline" size="sm" className="border-slate-200 text-xs text-slate-600 hover:bg-slate-50" onClick={() => setPaymentAmount(String(Math.round(totalAmount / 2)))}>Half</Button>
+                <Button variant="outline" size="sm" className="border-slate-200 text-xs text-slate-600 hover:bg-slate-50" onClick={() => setPaymentAmount(String(totalAmount))}>Full</Button>
               </div>
             </div>
 
-            <div className="space-y-1.5">
-              <Label className="text-sm font-medium text-slate-700">Notes (optional)</Label>
+            <div className="space-y-2">
+              <Label className="text-sm font-semibold text-slate-700">Notes <span className="font-normal text-slate-400">(optional)</span></Label>
               <Textarea
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
                 placeholder="Any additional notes..."
-                className="border-slate-200 focus-visible:ring-slate-400/20"
+                className="border-slate-200 focus-visible:ring-emerald-500/20 focus-visible:border-emerald-400"
                 rows={2}
               />
             </div>
 
-            <DialogFooter className="pt-2">
-              <Button variant="outline" onClick={() => setStep(2)} className="border-slate-200">Back</Button>
-              <Button onClick={handleSubmit} disabled={createOrderMut.isPending} className="bg-slate-900 hover:bg-slate-800 text-white">
+            <DialogFooter className="pt-3 border-t border-slate-100">
+              <Button variant="outline" onClick={() => setStep(2)} className="border-slate-200 text-slate-600">Back</Button>
+              <Button onClick={handleSubmit} disabled={createOrderMut.isPending} className="bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm shadow-emerald-600/20">
                 {createOrderMut.isPending ? "Creating Order..." : "Create Order"}
               </Button>
             </DialogFooter>
@@ -437,6 +530,13 @@ function WalkInOrderDialog({ open, onOpenChange }) {
 }
 
 function OrderDetail({ order, onClose, onStatusUpdate, onRecordPayment, statusMutation }) {
+  const { data: invoiceRes } = useQuery({
+    queryKey: ["invoice-by-order", order?._id],
+    queryFn: () => adminService.invoices.getByOrder(order._id),
+    enabled: !!order?._id,
+  });
+  const totalPaid = invoiceRes?.totalPaid ?? 0;
+  const remaining = invoiceRes?.remainingAmount ?? 0;
   if (!order) return null;
   const items = order.items || [];
   return (
@@ -477,7 +577,7 @@ function OrderDetail({ order, onClose, onStatusUpdate, onRecordPayment, statusMu
             </div>
             <div>
               <p className="text-xs text-slate-500">Payment Status</p>
-              <Badge variant="outline" className={order.paymentStatus === "paid" ? "text-emerald-700 bg-emerald-50 border-emerald-200" : order.paymentStatus === "partial" ? "text-amber-700 bg-amber-50 border-amber-200" : "text-red-700 bg-red-50 border-red-200"}>{order.paymentStatus || "unpaid"}</Badge>
+              <Badge variant="outline" className={order.paymentStatus === "PAID" ? "text-emerald-700 bg-emerald-50 border-emerald-200" : order.paymentStatus === "PARTIAL" ? "text-amber-700 bg-amber-50 border-amber-200" : "text-red-700 bg-red-50 border-red-200"}>{order.paymentStatus || "UNPAID"}</Badge>
             </div>
             <div>
               <p className="text-xs text-slate-500">Delivery Address</p>
@@ -522,6 +622,12 @@ function OrderDetail({ order, onClose, onStatusUpdate, onRecordPayment, statusMu
           <div className="text-right">
             <p className="text-xs text-slate-500">Total Amount</p>
             <p className="text-lg font-bold text-slate-900">₹{Number(order.totalAmount || 0).toLocaleString("en-IN")}</p>
+            {order.paymentStatus !== "PAID" && totalPaid > 0 && (
+              <>
+                <p className="text-xs text-emerald-600 mt-0.5">Paid: ₹{totalPaid.toLocaleString("en-IN")}</p>
+                <p className="text-xs text-red-600 font-medium">Remaining: ₹{remaining.toLocaleString("en-IN")}</p>
+              </>
+            )}
           </div>
         </div>
       </div>
@@ -529,18 +635,46 @@ function OrderDetail({ order, onClose, onStatusUpdate, onRecordPayment, statusMu
   );
 }
 
-function RecordPaymentDialog({ order, onClose, onRecord }) {
+function RecordPaymentDialog({ order, onClose }) {
+  const queryClient = useQueryClient();
   const [amount, setAmount] = useState("");
-  const [method, setMethod] = useState("cash");
+  const [method, setMethod] = useState("CASH");
   const [orderNotes, setOrderNotes] = useState("");
-  const remaining = order ? order.totalAmount - (order.paidAmount || 0) : 0;
+
+  const { data: invoiceRes, isLoading: invoiceLoading } = useQuery({
+    queryKey: ["invoice-by-order", order?._id],
+    queryFn: () => adminService.invoices.getByOrder(order._id),
+    enabled: !!order?._id,
+  });
+
+  const invoice = invoiceRes?.invoice;
+  const totalPaid = invoiceRes?.totalPaid ?? 0;
+  const remaining = invoiceRes?.remainingAmount ?? invoice?.totalAmount ?? 0;
 
   useEffect(() => { setAmount(remaining.toString()); }, [remaining]);
 
+  const paymentMut = useMutation({
+    mutationFn: (data) => adminService.payments.create(data),
+    onSuccess: () => {
+      queryClient.invalidateQueries(["admin-orders"]);
+      queryClient.invalidateQueries(["invoices"]);
+      queryClient.invalidateQueries(["payments"]);
+      toast.success("Payment recorded");
+      onClose();
+    },
+    onError: (e) => toast.error(e.message || "Failed to record payment"),
+  });
+
   const handleSubmit = () => {
+    if (!invoice) { toast.error("No invoice found for this order"); return; }
     if (!amount || Number(amount) <= 0) { toast.error("Enter valid amount"); return; }
     if (Number(amount) > remaining) { toast.error("Amount exceeds remaining balance"); return; }
-    onRecord({ orderId: order._id, amount: Number(amount), method, notes: orderNotes });
+    paymentMut.mutate({
+      invoiceId: invoice._id,
+      amountPaid: Number(amount),
+      paymentMethod: method,
+      notes: orderNotes || undefined,
+    });
   };
 
   return (
@@ -548,33 +682,61 @@ function RecordPaymentDialog({ order, onClose, onRecord }) {
       <DialogHeader className="pb-4 border-b border-slate-100">
         <DialogTitle className="text-lg font-semibold text-slate-900">Record Payment</DialogTitle>
       </DialogHeader>
-      <div className="space-y-4 pt-2">
-        <div className="rounded-lg bg-slate-50 p-3 border border-slate-200">
-          <p className="text-xs text-slate-500">Remaining Balance</p>
-          <p className="text-xl font-bold text-slate-900">₹{remaining.toLocaleString("en-IN")}</p>
+      {invoiceLoading ? (
+        <div className="py-8 text-center text-slate-400 text-sm">Loading invoice...</div>
+      ) : !invoice ? (
+        <div className="py-8 text-center text-slate-400 text-sm">No invoice found for this order</div>
+      ) : (
+        <div className="space-y-5 pt-2">
+          <div className="rounded-xl bg-gradient-to-br from-slate-50 to-slate-100 p-5 border border-slate-200">
+            <div className="flex items-center justify-between mb-3">
+              <div>
+                <p className="text-xs font-medium text-slate-500 uppercase tracking-wide">Invoice {invoice.invoiceNo}</p>
+                <p className="text-xs text-slate-500 mt-0.5">Total: ₹{invoice.totalAmount?.toLocaleString("en-IN")}</p>
+              </div>
+              <div className="text-right">
+                <p className="text-xs font-medium text-slate-500 uppercase tracking-wide">Paid So Far</p>
+                <p className="text-sm font-semibold text-emerald-600">₹{totalPaid.toLocaleString("en-IN")}</p>
+              </div>
+            </div>
+            <div className="pt-3 border-t border-slate-200">
+              <div className="flex items-center justify-between">
+                <p className="text-sm font-medium text-slate-700">Remaining Balance</p>
+                <p className="text-2xl font-bold text-red-600">₹{remaining.toLocaleString("en-IN")}</p>
+              </div>
+            </div>
+          </div>
+          <div className="space-y-2">
+            <Label className="text-sm font-semibold text-slate-700">Amount</Label>
+            <Input type="number" value={amount} onChange={(e) => setAmount(e.target.value)} max={remaining} className="border-slate-200 focus-visible:ring-emerald-500/20 focus-visible:border-emerald-400 h-11" />
+            <div className="flex gap-2">
+              <Button variant="outline" size="sm" className="border-slate-200 text-xs text-slate-600" onClick={() => setAmount(String(Math.round(remaining / 2)))}>Half</Button>
+              <Button variant="outline" size="sm" className="border-slate-200 text-xs text-slate-600" onClick={() => setAmount(String(remaining))}>Full</Button>
+            </div>
+          </div>
+          <div className="space-y-2">
+            <Label className="text-sm font-semibold text-slate-700">Payment Method</Label>
+            <Select value={method} onValueChange={setMethod}>
+              <SelectTrigger className="border-slate-200 h-11"><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="CASH">Cash</SelectItem>
+                <SelectItem value="UPI">UPI</SelectItem>
+                <SelectItem value="CARD">Card</SelectItem>
+                <SelectItem value="BANK_TRANSFER">Bank Transfer</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="space-y-2">
+            <Label className="text-sm font-semibold text-slate-700">Notes <span className="font-normal text-slate-400">(optional)</span></Label>
+            <Textarea value={orderNotes} onChange={(e) => setOrderNotes(e.target.value)} placeholder="Any additional notes..." className="border-slate-200 focus-visible:ring-emerald-500/20 focus-visible:border-emerald-400" rows={2} />
+          </div>
         </div>
-        <div className="space-y-1.5">
-          <Label className="text-sm font-medium text-slate-700">Amount *</Label>
-          <Input type="number" value={amount} onChange={(e) => setAmount(e.target.value)} max={remaining} className="border-slate-200 focus-visible:ring-slate-400/20" />
-        </div>
-        <div className="space-y-1.5">
-          <Label className="text-sm font-medium text-slate-700">Payment Method</Label>
-          <Select value={method} onValueChange={setMethod}>
-            <SelectTrigger className="border-slate-200"><SelectValue /></SelectTrigger>
-            <SelectContent>
-              <SelectItem value="cash">Cash</SelectItem><SelectItem value="upi">UPI</SelectItem>
-              <SelectItem value="card">Card</SelectItem><SelectItem value="bank_transfer">Bank Transfer</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-        <div className="space-y-1.5">
-          <Label className="text-sm font-medium text-slate-700">Notes</Label>
-          <Textarea value={orderNotes} onChange={(e) => setOrderNotes(e.target.value)} placeholder="Optional" className="border-slate-200 focus-visible:ring-slate-400/20" />
-        </div>
-      </div>
-      <DialogFooter className="pt-2">
-        <Button variant="outline" onClick={onClose} className="border-slate-200">Cancel</Button>
-        <Button onClick={handleSubmit} className="bg-slate-900 hover:bg-slate-800 text-white">Record Payment</Button>
+      )}
+      <DialogFooter className="pt-3 border-t border-slate-100">
+        <Button variant="outline" onClick={onClose} className="border-slate-200 text-slate-600">Cancel</Button>
+        <Button onClick={handleSubmit} disabled={paymentMut.isPending || invoiceLoading || !invoice} className="bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm shadow-emerald-600/20">
+          {paymentMut.isPending ? "Recording..." : "Record Payment"}
+        </Button>
       </DialogFooter>
     </DialogContent>
   );
@@ -603,12 +765,6 @@ export default function Orders() {
     onError: (e) => toast.error(e.message || "Failed to update"),
   });
 
-  const paymentMutation = useMutation({
-    mutationFn: (data) => orderService.recordPayment(data),
-    onSuccess: () => { queryClient.invalidateQueries(["admin-orders"]); toast.success("Payment recorded"); setPaymentOrder(null); },
-    onError: (e) => toast.error(e.message || "Failed to record payment"),
-  });
-
   const orders = data?.orders || [];
   const totalPages = data?.totalPages || 1;
   const totalCount = data?.totalCount || 0;
@@ -620,7 +776,7 @@ export default function Orders() {
           <h2 className="text-2xl font-bold tracking-tight text-slate-900">Orders</h2>
           <p className="text-sm text-slate-500 mt-1">{totalCount} total orders</p>
         </div>
-        <Button onClick={() => setShowWalkInDialog(true)} className="bg-slate-900 hover:bg-slate-800 text-white shadow-sm rounded-lg">
+        <Button onClick={() => setShowWalkInDialog(true)} className="bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm shadow-emerald-600/20 rounded-lg">
           <Plus className="h-4 w-4 mr-2" /> Walk-in Order
         </Button>
       </div>
@@ -683,7 +839,7 @@ export default function Orders() {
                       <Badge variant="outline" className={`text-xs capitalize ${statusStyles[order.status] || "text-slate-700 bg-slate-50 border-slate-200"}`}>{order.status}</Badge>
                     </TableCell>
                     <TableCell>
-                      <Badge variant="outline" className={`text-xs capitalize ${order.paymentStatus === "paid" ? "text-emerald-700 bg-emerald-50 border-emerald-200" : order.paymentStatus === "partial" ? "text-amber-700 bg-amber-50 border-amber-200" : "text-red-700 bg-red-50 border-red-200"}`}>{order.paymentStatus || "unpaid"}</Badge>
+                      <Badge variant="outline" className={`text-xs capitalize ${order.paymentStatus === "PAID" ? "text-emerald-700 bg-emerald-50 border-emerald-200" : order.paymentStatus === "PARTIAL" ? "text-amber-700 bg-amber-50 border-amber-200" : "text-red-700 bg-red-50 border-red-200"}`}>{order.paymentStatus || "UNPAID"}</Badge>
                     </TableCell>
                     <TableCell className="text-right font-medium text-slate-900 text-sm">₹{Number(order.totalAmount || 0).toLocaleString("en-IN")}</TableCell>
                     <TableCell className="text-right pr-5">
@@ -732,7 +888,7 @@ export default function Orders() {
       </Dialog>
 
       <Dialog open={!!paymentOrder} onOpenChange={() => setPaymentOrder(null)}>
-        <RecordPaymentDialog order={paymentOrder} onClose={() => setPaymentOrder(null)} onRecord={(data) => paymentMutation.mutate(data)} />
+        <RecordPaymentDialog order={paymentOrder} onClose={() => setPaymentOrder(null)} />
       </Dialog>
     </div>
   );

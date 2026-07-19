@@ -19,6 +19,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { formatCurrency } from "@/lib/utils";
+import ProductImage from "@/components/common/ProductImage";
 import {
   useCart,
   useAddresses,
@@ -30,50 +31,50 @@ import {
 
 function CheckoutSkeleton() {
   return (
-    <div className="shop-page">
-      <div className="page-hero page-hero-green">
-        <div className="page-hero-inner">
-          <div className="page-hero-content">
+    <div className="min-h-screen bg-gray-50">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        <div className="bg-green-600 text-white rounded-2xl p-6 mb-6">
+          <div className="flex items-center gap-3">
             <ClipboardCheck className="h-6 w-6" />
             <div>
-              <div style={{ width: 140, height: 20, background: "rgba(255,255,255,0.3)", borderRadius: 4 }} />
-              <div style={{ width: 100, height: 12, background: "rgba(255,255,255,0.2)", borderRadius: 4, marginTop: 6 }} />
+              <div className="h-5 w-36 bg-white/30 rounded" />
+              <div className="h-3 w-24 bg-white/20 rounded mt-1.5" />
             </div>
           </div>
         </div>
-      </div>
-      <div className="checkout-layout">
-        <div className="checkout-card">
-          <div style={{ padding: 24 }}>
-            {[1, 2, 3].map((_, i) => (
-              <div key={i} style={{ marginBottom: i < 2 ? 24 : 0 }}>
-                <div style={{ width: 140, height: 16, background: "#f1f5f9", borderRadius: 4, marginBottom: 14 }} />
-                {[1, 2].map((_, j) => (
-                  <div key={j} style={{ display: "flex", gap: 14, padding: "12px 0", borderBottom: j < 1 ? "1px solid #f1f5f9" : "none" }}>
-                    <div style={{ width: 20, height: 20, borderRadius: "50%", background: "#f1f5f9" }} />
-                    <div style={{ flex: 1 }}>
-                      <div style={{ width: "40%", height: 12, background: "#f1f5f9", borderRadius: 4, marginBottom: 8 }} />
-                      <div style={{ width: "70%", height: 10, background: "#f1f5f9", borderRadius: 4 }} />
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="lg:col-span-2">
+            <div className="bg-white rounded-xl border p-6">
+              {[1, 2, 3].map((_, i) => (
+                <div key={i} className={i < 2 ? "mb-6" : ""}>
+                  <div className="h-4 w-36 bg-slate-100 rounded mb-3.5" />
+                  {[1, 2].map((_, j) => (
+                    <div key={j} className={`flex gap-3.5 py-3 ${j < 1 ? "border-b border-slate-100" : ""}`}>
+                      <div className="w-5 h-5 rounded-full bg-slate-100" />
+                      <div className="flex-1">
+                        <div className="h-3 w-2/5 bg-slate-100 rounded mb-2" />
+                        <div className="h-2.5 w-[70%] bg-slate-100 rounded" />
+                      </div>
                     </div>
-                  </div>
-                ))}
-              </div>
-            ))}
-          </div>
+                  ))}
+                </div>
+              ))}
+            </div>
         </div>
-        <div className="checkout-summary">
-          <div style={{ padding: "18px 24px", borderBottom: "1px solid #f1f5f9" }}>
-            <div style={{ width: "50%", height: 16, background: "#f1f5f9", borderRadius: 4 }} />
+        <div className="bg-white rounded-xl border">
+          <div className="px-6 py-4 border-b border-slate-100">
+            <div className="h-4 w-1/2 bg-slate-100 rounded" />
           </div>
-          <div style={{ padding: 20 }}>
+          <div className="p-5">
             {[1, 2, 3].map((_, i) => (
-              <div key={i} style={{ display: "flex", justifyContent: "space-between", marginBottom: 12 }}>
-                <div style={{ width: "50%", height: 12, background: "#f1f5f9", borderRadius: 4 }} />
-                <div style={{ width: "20%", height: 12, background: "#f1f5f9", borderRadius: 4 }} />
+              <div key={i} className="flex justify-between mb-3">
+                <div className="h-3 w-1/2 bg-slate-100 rounded" />
+                <div className="h-3 w-1/5 bg-slate-100 rounded" />
               </div>
             ))}
           </div>
         </div>
+      </div>
       </div>
     </div>
   );
@@ -218,12 +219,18 @@ export default function Checkout() {
 
   if (items.length === 0) {
     return (
-      <div className="shop-page">
-        <div className="empty-state" style={{ marginTop: 24 }}>
-          <div className="empty-state-icon"><ShoppingBag className="h-12 w-12" /></div>
-          <h3>Your cart is empty</h3>
-          <p>Add items to your cart to checkout.</p>
-          <Link to="/shop" className="empty-state-btn"><ShoppingBag className="h-4 w-4" /> Browse Products</Link>
+      <div className="min-h-screen bg-gray-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+          <div className="flex flex-col items-center justify-center py-24 text-center">
+            <div className="w-16 h-16 rounded-full bg-gray-100 flex items-center justify-center mb-4">
+              <ShoppingBag className="h-12 w-12 text-gray-400" />
+            </div>
+            <h3 className="text-lg font-semibold text-gray-900">Your cart is empty</h3>
+            <p className="text-gray-500 mt-1">Add items to your cart to checkout.</p>
+            <Link to="/shop" className="mt-4 inline-flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg text-sm font-medium hover:bg-green-700 transition">
+              <ShoppingBag className="h-4 w-4" /> Browse Products
+            </Link>
+          </div>
         </div>
       </div>
     );
@@ -232,174 +239,179 @@ export default function Checkout() {
   const selectedAddr = addresses.find((a) => a._id === selectedAddress);
 
   return (
-    <div className="shop-page">
+    <div className="min-h-screen bg-gray-50">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
       {/* Hero */}
-      <div className="page-hero page-hero-green">
-        <div className="page-hero-inner">
-          <div className="page-hero-content">
-            <ClipboardCheck className="h-6 w-6" />
-            <div>
-              <h1>Secure Checkout</h1>
-              <p>{items.length} item{items.length !== 1 ? "s" : ""} • {formatCurrency(grandTotal)}</p>
-            </div>
+      <div className="bg-green-600 text-white rounded-2xl p-6 mb-6 shadow-lg shadow-green-600/20">
+        <div className="flex items-center gap-3">
+          <ClipboardCheck className="h-6 w-6" />
+          <div>
+            <h1 className="text-xl font-bold">Secure Checkout</h1>
+            <p className="text-green-100 text-sm">{items.length} item{items.length !== 1 ? "s" : ""} • {formatCurrency(grandTotal)}</p>
           </div>
         </div>
       </div>
 
-      <div className="checkout-layout">
-        {/* Main Content - Single Card */}
-        <div>
-          <div className="checkout-card">
-            <div className="checkout-card-header">
-              <h3><ClipboardCheck /> Complete Your Order</h3>
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Main Content */}
+        <div className="lg:col-span-2">
+          <div className="bg-white rounded-xl border shadow-sm">
+            <div className="p-6 border-b border-gray-100">
+              <h3 className="text-lg font-semibold flex items-center gap-2">
+                <ClipboardCheck className="h-5 w-5" /> Complete Your Order
+              </h3>
             </div>
-            <div className="checkout-card-body">
+            <div className="p-6">
 
               {/* Section 1: Delivery Address */}
-              <div className="checkout-section">
-                <div className="checkout-section-title">
-                  <div className="checkout-section-num">1</div>
-                  <MapPin />
+              <div>
+                <div className="flex items-center gap-3 text-lg font-semibold mb-4">
+                  <div className="w-7 h-7 rounded-full bg-green-600 text-white flex items-center justify-center text-sm font-bold">1</div>
+                  <MapPin className="h-5 w-5 text-green-600" />
                   <span>Delivery Address</span>
-                  {selectedAddr && <span className="checkout-section-done"><BadgeCheck /> Selected</span>}
+                  {selectedAddr && <span className="ml-auto text-sm text-green-600 font-medium flex items-center gap-1"><BadgeCheck className="h-4 w-4" /> Selected</span>}
                 </div>
                 {addresses.length === 0 ? (
-                  <div className="addr-empty">
-                    <div className="addr-empty-icon"><MapPin /></div>
-                    <p>No saved addresses yet</p>
-                    <button className="checkout-add-btn" style={{ margin: "12px auto 0" }} onClick={() => { setEditingAddress(null); setAddressForm({ name: "", phone: "", address: "", city: "", state: "", pincode: "", type: "home" }); setShowAddressDialog(true); }}>
-                      <Plus /> Add Address
+                  <div className="text-center py-8">
+                    <div className="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center mx-auto mb-3">
+                      <MapPin className="h-6 w-6 text-gray-400" />
+                    </div>
+                    <p className="text-gray-500">No saved addresses yet</p>
+                    <button className="mt-3 inline-flex items-center gap-2 px-4 py-2 border border-green-600 text-green-600 rounded-lg text-sm font-medium hover:bg-green-50 transition mx-auto" onClick={() => { setEditingAddress(null); setAddressForm({ fullName: "", phone: "", addressLine1: "", addressLine2: "", city: "", state: "", pincode: "", landmark: "" }); setShowAddressDialog(true); }}>
+                      <Plus className="h-4 w-4" /> Add Address
                     </button>
                   </div>
                 ) : (
                   <>
                     {addresses.map((addr) => (
-                      <div key={addr._id} className={`addr-card ${selectedAddress === addr._id ? "selected" : ""}`} onClick={() => setSelectedAddress(addr._id)}>
-                        <div className="addr-radio" />
-                        <div className="addr-info">
-                          <p className="addr-name">{addr.fullName}</p>
-                          <p className="addr-text">{addr.addressLine1}{addr.addressLine2 ? `, ${addr.addressLine2}` : ""}, {addr.city}, {addr.state} - {addr.pincode}</p>
-                          <p className="addr-text" style={{ marginTop: 2 }}>Phone: {addr.phone}</p>
+                      <div key={addr._id} className={`flex items-start gap-3 p-4 border rounded-xl cursor-pointer transition mb-2 shadow-sm hover:shadow-md ${selectedAddress === addr._id ? "border-green-500 bg-green-50" : "hover:border-green-300"}`} onClick={() => setSelectedAddress(addr._id)}>
+                        <div className={`w-5 h-5 rounded-full border-2 flex-shrink-0 mt-0.5 flex items-center justify-center ${selectedAddress === addr._id ? "border-green-600" : "border-gray-300"}`}>
+                          {selectedAddress === addr._id && <div className="w-2.5 h-2.5 rounded-full bg-green-600" />}
                         </div>
-                        <div className="addr-actions">
-                          <button className="addr-action-btn" title="Edit" onClick={(e) => { e.stopPropagation(); setEditingAddress(addr._id); setAddressForm({ fullName: addr.fullName, phone: addr.phone, addressLine1: addr.addressLine1, addressLine2: addr.addressLine2 || "", city: addr.city, state: addr.state, pincode: addr.pincode, landmark: addr.landmark || "" }); setShowAddressDialog(true); }}>
-                            <Pencil />
+                        <div className="flex-1 min-w-0">
+                          <p className="font-semibold text-gray-900 text-sm">{addr.fullName}</p>
+                          <p className="text-gray-500 text-sm mt-0.5">{addr.addressLine1}{addr.addressLine2 ? `, ${addr.addressLine2}` : ""}, {addr.city}, {addr.state} - {addr.pincode}</p>
+                          <p className="text-gray-500 text-xs mt-0.5">Phone: {addr.phone}</p>
+                        </div>
+                        <div className="flex gap-1 flex-shrink-0">
+                          <button className="p-1.5 text-gray-400 hover:text-green-600 hover:bg-green-50 rounded-lg transition" title="Edit" onClick={(e) => { e.stopPropagation(); setEditingAddress(addr._id); setAddressForm({ fullName: addr.fullName, phone: addr.phone, addressLine1: addr.addressLine1, addressLine2: addr.addressLine2 || "", city: addr.city, state: addr.state, pincode: addr.pincode, landmark: addr.landmark || "" }); setShowAddressDialog(true); }}>
+                            <Pencil className="h-4 w-4" />
                           </button>
-                          <button className="addr-action-btn" title="Delete" onClick={(e) => { e.stopPropagation(); handleDeleteAddress(addr._id); }}>
-                            <Trash2 />
+                          <button className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition" title="Delete" onClick={(e) => { e.stopPropagation(); handleDeleteAddress(addr._id); }}>
+                            <Trash2 className="h-4 w-4" />
                           </button>
                         </div>
                       </div>
                     ))}
-                    <button className="checkout-add-btn" onClick={() => { setEditingAddress(null); setAddressForm({ fullName: "", phone: "", addressLine1: "", addressLine2: "", city: "", state: "", pincode: "", landmark: "" }); setShowAddressDialog(true); }}>
-                      <Plus /> Add New Address
+                    <button className="inline-flex items-center gap-2 px-4 py-2 border border-dashed border-gray-300 text-gray-600 rounded-lg text-sm font-medium hover:border-green-400 hover:text-green-600 hover:bg-green-50 transition mt-2" onClick={() => { setEditingAddress(null); setAddressForm({ fullName: "", phone: "", addressLine1: "", addressLine2: "", city: "", state: "", pincode: "", landmark: "" }); setShowAddressDialog(true); }}>
+                      <Plus className="h-4 w-4" /> Add New Address
                     </button>
                   </>
                 )}
               </div>
 
-              <div className="checkout-section-divider" />
+              <div className="border-b border-gray-100 my-6" />
 
               {/* Section 2: Payment */}
-              <div className="checkout-section">
-                <div className="checkout-section-title">
-                  <div className="checkout-section-num">2</div>
-                  <CreditCard />
+              <div>
+                <div className="flex items-center gap-3 text-lg font-semibold mb-4">
+                  <div className="w-7 h-7 rounded-full bg-green-600 text-white flex items-center justify-center text-sm font-bold">2</div>
+                  <CreditCard className="h-5 w-5 text-green-600" />
                   <span>Payment</span>
                 </div>
-                <div className="pay-choose-list">
+                <div className="space-y-2">
                   <div
-                    className={`pay-choose-card ${paymentMethod === "RAZORPAY" ? "selected" : ""}`}
+                    className={`flex items-center gap-4 p-4 border rounded-xl cursor-pointer transition shadow-sm ${paymentMethod === "RAZORPAY" ? "border-green-500 bg-green-50" : "hover:border-green-300"}`}
                     onClick={() => setPaymentMethod("RAZORPAY")}
                   >
-                    <div className="pay-choose-left">
-                      <div className="pay-choose-radio">
-                        {paymentMethod === "RAZORPAY" && <div className="pay-choose-radio-dot" />}
+                    <div className="flex items-center gap-3 flex-1">
+                      <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0 ${paymentMethod === "RAZORPAY" ? "border-green-600" : "border-gray-300"}`}>
+                        {paymentMethod === "RAZORPAY" && <div className="w-2.5 h-2.5 rounded-full bg-green-600" />}
                       </div>
-                      <div className="pay-choose-icon" style={{ background: "#16a34a", color: "#fff" }}>
-                        <Smartphone />
+                      <div className="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0 bg-green-600 text-white">
+                        <Smartphone className="h-5 w-5" />
                       </div>
-                      <div className="pay-choose-info">
-                        <p className="pay-choose-title">Pay via Razorpay</p>
-                        <p className="pay-choose-desc">UPI, Credit/Debit Cards, Net Banking, Wallets</p>
+                      <div>
+                        <p className="font-semibold text-gray-900 text-sm">Pay via Razorpay</p>
+                        <p className="text-gray-500 text-xs">UPI, Credit/Debit Cards, Net Banking, Wallets</p>
                       </div>
                     </div>
-                    {paymentMethod === "RAZORPAY" && <ShieldCheck style={{ width: 18, height: 18, color: "#16a34a", flexShrink: 0 }} />}
+                    {paymentMethod === "RAZORPAY" && <ShieldCheck className="h-5 w-5 text-green-600 flex-shrink-0" />}
                   </div>
 
                   <div
-                    className={`pay-choose-card ${paymentMethod === "COD" ? "selected" : ""}`}
+                    className={`flex items-center gap-4 p-4 border rounded-xl cursor-pointer transition shadow-sm ${paymentMethod === "COD" ? "border-green-500 bg-green-50" : "hover:border-green-300"}`}
                     onClick={() => setPaymentMethod("COD")}
                   >
-                    <div className="pay-choose-left">
-                      <div className="pay-choose-radio">
-                        {paymentMethod === "COD" && <div className="pay-choose-radio-dot" />}
+                    <div className="flex items-center gap-3 flex-1">
+                      <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0 ${paymentMethod === "COD" ? "border-green-600" : "border-gray-300"}`}>
+                        {paymentMethod === "COD" && <div className="w-2.5 h-2.5 rounded-full bg-green-600" />}
                       </div>
-                      <div className="pay-choose-icon" style={{ background: "#fff7ed", color: "#ea580c" }}>
-                        <Banknote />
+                      <div className="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0 bg-orange-50 text-orange-600">
+                        <Banknote className="h-5 w-5" />
                       </div>
-                      <div className="pay-choose-info">
-                        <p className="pay-choose-title">Cash on Delivery</p>
-                        <p className="pay-choose-desc">Pay when your order arrives at your doorstep</p>
+                      <div>
+                        <p className="font-semibold text-gray-900 text-sm">Cash on Delivery</p>
+                        <p className="text-gray-500 text-xs">Pay when your order arrives at your doorstep</p>
                       </div>
                     </div>
-                    {paymentMethod === "COD" && <BadgeCheck style={{ width: 18, height: 18, color: "#16a34a", flexShrink: 0 }} />}
+                    {paymentMethod === "COD" && <BadgeCheck className="h-5 w-5 text-green-600 flex-shrink-0" />}
                   </div>
                 </div>
 
                 {paymentMethod === "RAZORPAY" && (
-                  <div className="pay-trust-row">
-                    <Lock style={{ width: "13px", height: "13px" }} />
+                  <div className="flex items-center gap-2 mt-3 px-3 py-2 bg-green-50 text-green-700 rounded-lg text-xs">
+                    <Lock className="h-3.5 w-3.5" />
                     <span>Secured by Razorpay — 256-bit SSL encryption</span>
                   </div>
                 )}
                 {paymentMethod === "COD" && (
-                  <div className="pay-trust-row" style={{ background: "#fff7ed" }}>
-                    <Banknote style={{ width: "13px", height: "13px", color: "#ea580c" }} />
-                    <span style={{ color: "#9a3412" }}>Pay cash when your order is delivered</span>
+                  <div className="flex items-center gap-2 mt-3 px-3 py-2 bg-orange-50 rounded-lg text-xs">
+                    <Banknote className="h-3.5 w-3.5 text-orange-600" />
+                    <span className="text-orange-700">Pay cash when your order is delivered</span>
                   </div>
                 )}
               </div>
 
-              <div className="checkout-section-divider" />
+              <div className="border-b border-gray-100 my-6" />
 
               {/* Section 3: Order Items */}
-              <div className="checkout-section">
-                <div className="checkout-section-title">
-                  <div className="checkout-section-num">3</div>
-                  <ShoppingBag />
+              <div>
+                <div className="flex items-center gap-3 text-lg font-semibold mb-4">
+                  <div className="w-7 h-7 rounded-full bg-green-600 text-white flex items-center justify-center text-sm font-bold">3</div>
+                  <ShoppingBag className="h-5 w-5 text-green-600" />
                   <span>Order Items ({items.length})</span>
                 </div>
                 {items.map((item) => {
                   const product = item.productId || {};
                   return (
-                    <div key={product._id} className="review-item">
-                      <img src={product.images?.[0] || "/placeholder.png"} alt={product.name} />
-                      <div className="review-item-info">
-                        <p className="review-item-name">{product.name}</p>
-                        <p className="review-item-qty">Qty: {item.quantity} × {formatCurrency(item.price)}</p>
+                    <div key={product._id} className="flex items-center gap-3 py-3">
+                      <ProductImage src={product.images?.[0]} alt={product.name} className="w-12 h-12 rounded-lg object-cover border flex-shrink-0" />
+                      <div className="flex-1 min-w-0">
+                        <p className="font-medium text-gray-900 text-sm truncate">{product.name}</p>
+                        <p className="text-gray-500 text-xs">Qty: {item.quantity} × {formatCurrency(item.price)}</p>
                       </div>
-                      <span className="review-item-price">{formatCurrency(item.price * item.quantity)}</span>
+                      <span className="font-semibold text-gray-900 text-sm flex-shrink-0">{formatCurrency(item.price * item.quantity)}</span>
                     </div>
                   );
                 })}
               </div>
 
-              <div className="checkout-section-divider" />
+              <div className="border-b border-gray-100 my-6" />
 
               {/* Place Order */}
-              <div className="checkout-btn-row">
+              <div className="pt-2">
                 <button
-                  className="checkout-btn-next checkout-btn-place"
+                  className="w-full py-3 bg-green-600 text-white rounded-xl font-semibold flex items-center justify-center gap-2 hover:bg-green-700 shadow-lg shadow-green-600/30 hover:shadow-xl transition disabled:opacity-50 disabled:cursor-not-allowed"
                   onClick={handlePlaceOrder}
                   disabled={checkout.isPending || !selectedAddress}
                 >
                   {checkout.isPending ? (
                     <>Processing...</>
                   ) : paymentMethod === "COD" ? (
-                    <><CircleDollarSign style={{ width: 16, height: 16 }} /> Place Order</>
+                    <><CircleDollarSign className="h-4 w-4" /> Place Order</>
                   ) : (
-                    <><Lock style={{ width: 16, height: 16 }} /> Pay {formatCurrency(grandTotal)} via Razorpay</>
+                    <><Lock className="h-4 w-4" /> Pay {formatCurrency(grandTotal)} via Razorpay</>
                   )}
                 </button>
               </div>
@@ -409,48 +421,48 @@ export default function Checkout() {
 
         {/* Order Summary Sidebar */}
         <div>
-          <div className="checkout-summary">
-            <div className="checkout-summary-header">
-              <h3>Order Summary</h3>
+          <div className="bg-white rounded-xl border p-4">
+            <div className="px-4 py-3 border-b border-gray-100">
+              <h3 className="text-lg font-semibold">Order Summary</h3>
             </div>
-            <div className="checkout-summary-body">
+            <div className="p-4">
               {items.map((item) => {
                 const product = item.productId || {};
                 return (
-                  <div key={product._id} className="summary-item">
-                    <span className="label">{product.name} × {item.quantity}</span>
-                    <span className="value">{formatCurrency(item.price * item.quantity)}</span>
+                  <div key={product._id} className="flex justify-between text-sm mb-3">
+                    <span className="text-gray-600 truncate pr-2">{product.name} × {item.quantity}</span>
+                    <span className="font-medium text-gray-900 flex-shrink-0">{formatCurrency(item.price * item.quantity)}</span>
                   </div>
                 );
               })}
-              <div className="summary-divider" />
-              <div className="summary-row">
-                <span className="label">Subtotal</span>
-                <span className="value">{formatCurrency(subtotal)}</span>
+              <div className="border-t border-gray-100 my-3" />
+              <div className="flex justify-between text-sm mb-2">
+                <span className="text-gray-600">Subtotal</span>
+                <span className="font-medium text-gray-900">{formatCurrency(subtotal)}</span>
               </div>
-              <div className="summary-row">
-                <span className="label">GST (18%)</span>
-                <span className="value">{formatCurrency(gst)}</span>
+              <div className="flex justify-between text-sm mb-2">
+                <span className="text-gray-600">GST (18%)</span>
+                <span className="font-medium text-gray-900">{formatCurrency(gst)}</span>
               </div>
-              <div className="summary-row">
-                <span className="label">Delivery</span>
-                <span className="value" style={{ color: "#16a34a", fontWeight: 600 }}>FREE</span>
+              <div className="flex justify-between text-sm mb-2">
+                <span className="text-gray-600">Delivery</span>
+                <span className="font-semibold text-green-600">FREE</span>
               </div>
               {discount > 0 && (
-                <div className="summary-row discount">
-                  <span className="label">Discount</span>
-                  <span className="value">-{formatCurrency(discount)}</span>
+                <div className="flex justify-between text-sm mb-2">
+                  <span className="text-gray-600">Discount</span>
+                  <span className="font-medium text-green-600">-{formatCurrency(discount)}</span>
                 </div>
               )}
-              <div className="summary-divider" />
-              <div className="summary-total">
-                <span className="label">Total</span>
-                <span className="value">{formatCurrency(grandTotal)}</span>
+              <div className="border-t border-gray-100 my-3" />
+              <div className="flex justify-between">
+                <span className="font-semibold text-gray-900">Total</span>
+                <span className="font-bold text-gray-900 text-lg">{formatCurrency(grandTotal)}</span>
               </div>
             </div>
-            <div style={{ padding: "0 24px 20px" }}>
-              <div className="trust-badge blue">
-                <ShieldCheck /> 100% secure checkout
+            <div className="px-4 pb-4">
+              <div className="flex items-center justify-center gap-2 p-3 bg-blue-50 text-blue-700 rounded-lg text-sm">
+                <ShieldCheck className="h-4 w-4" /> 100% secure checkout
               </div>
             </div>
           </div>
@@ -459,67 +471,70 @@ export default function Checkout() {
 
       {/* Address Dialog */}
       {showAddressDialog && (
-        <div className="addr-dialog-overlay" onClick={() => { setShowAddressDialog(false); setFormErrors({}); }}>
-          <div className="addr-dialog" onClick={(e) => e.stopPropagation()}>
-            <div className="addr-dialog-header">
-              <h3>{editingAddress ? "Edit Address" : "Add New Address"}</h3>
-              <button className="addr-dialog-close" onClick={() => { setShowAddressDialog(false); setFormErrors({}); }}><X /></button>
+        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center p-4" onClick={() => { setShowAddressDialog(false); setFormErrors({}); }}>
+          <div className="bg-white rounded-2xl w-full max-w-lg shadow-2xl" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center justify-between p-5 border-b border-gray-100">
+              <h3 className="text-lg font-semibold">{editingAddress ? "Edit Address" : "Add New Address"}</h3>
+              <button className="p-1.5 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition" onClick={() => { setShowAddressDialog(false); setFormErrors({}); }}>
+                <X className="h-5 w-5" />
+              </button>
             </div>
-            <div className="addr-dialog-body">
-              <div className="addr-form-row">
-                <div className="addr-form-group">
-                  <label>Full Name <span className="required">*</span></label>
-                  <input className={`addr-form-input ${formErrors.fullName ? "error" : ""}`} value={addressForm.fullName} onChange={(e) => { setAddressForm((p) => ({ ...p, fullName: e.target.value })); if (formErrors.fullName) setFormErrors((p) => ({ ...p, fullName: "" })); }} placeholder="John Doe" />
-                  {formErrors.fullName && <p className="addr-form-error"><AlertCircle /> {formErrors.fullName}</p>}
+            <div className="p-5 space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Full Name <span className="text-red-500">*</span></label>
+                  <input className={`w-full border rounded-lg px-3 py-2.5 text-sm focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none ${formErrors.fullName ? "border-red-400" : "border-gray-300"}`} value={addressForm.fullName} onChange={(e) => { setAddressForm((p) => ({ ...p, fullName: e.target.value })); if (formErrors.fullName) setFormErrors((p) => ({ ...p, fullName: "" })); }} placeholder="John Doe" />
+                  {formErrors.fullName && <p className="text-red-500 text-xs mt-1 flex items-center gap-1"><AlertCircle className="h-3 w-3" /> {formErrors.fullName}</p>}
                 </div>
-                <div className="addr-form-group">
-                  <label>Phone <span className="required">*</span></label>
-                  <input className={`addr-form-input ${formErrors.phone ? "error" : ""}`} value={addressForm.phone} onChange={(e) => { setAddressForm((p) => ({ ...p, phone: e.target.value })); if (formErrors.phone) setFormErrors((p) => ({ ...p, phone: "" })); }} placeholder="98765 43210" />
-                  {formErrors.phone && <p className="addr-form-error"><AlertCircle /> {formErrors.phone}</p>}
-                </div>
-              </div>
-              <div className="addr-form-group">
-                <label>Address Line 1 <span className="required">*</span></label>
-                <input className={`addr-form-input ${formErrors.addressLine1 ? "error" : ""}`} value={addressForm.addressLine1} onChange={(e) => { setAddressForm((p) => ({ ...p, addressLine1: e.target.value })); if (formErrors.addressLine1) setFormErrors((p) => ({ ...p, addressLine1: "" })); }} placeholder="Street address, apartment, etc." />
-                {formErrors.addressLine1 && <p className="addr-form-error"><AlertCircle /> {formErrors.addressLine1}</p>}
-              </div>
-              <div className="addr-form-group">
-                <label>Address Line 2</label>
-                <input className="addr-form-input" value={addressForm.addressLine2} onChange={(e) => setAddressForm((p) => ({ ...p, addressLine2: e.target.value }))} placeholder="Flat, building, floor (optional)" />
-              </div>
-              <div className="addr-form-row">
-                <div className="addr-form-group">
-                  <label>City <span className="required">*</span></label>
-                  <input className={`addr-form-input ${formErrors.city ? "error" : ""}`} value={addressForm.city} onChange={(e) => { setAddressForm((p) => ({ ...p, city: e.target.value })); if (formErrors.city) setFormErrors((p) => ({ ...p, city: "" })); }} />
-                  {formErrors.city && <p className="addr-form-error"><AlertCircle /> {formErrors.city}</p>}
-                </div>
-                <div className="addr-form-group">
-                  <label>State <span className="required">*</span></label>
-                  <input className={`addr-form-input ${formErrors.state ? "error" : ""}`} value={addressForm.state} onChange={(e) => { setAddressForm((p) => ({ ...p, state: e.target.value })); if (formErrors.state) setFormErrors((p) => ({ ...p, state: "" })); }} />
-                  {formErrors.state && <p className="addr-form-error"><AlertCircle /> {formErrors.state}</p>}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Phone <span className="text-red-500">*</span></label>
+                  <input className={`w-full border rounded-lg px-3 py-2.5 text-sm focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none ${formErrors.phone ? "border-red-400" : "border-gray-300"}`} value={addressForm.phone} onChange={(e) => { setAddressForm((p) => ({ ...p, phone: e.target.value })); if (formErrors.phone) setFormErrors((p) => ({ ...p, phone: "" })); }} placeholder="98765 43210" />
+                  {formErrors.phone && <p className="text-red-500 text-xs mt-1 flex items-center gap-1"><AlertCircle className="h-3 w-3" /> {formErrors.phone}</p>}
                 </div>
               </div>
-              <div className="addr-form-row">
-                <div className="addr-form-group">
-                  <label>Pincode <span className="required">*</span></label>
-                  <input className={`addr-form-input ${formErrors.pincode ? "error" : ""}`} value={addressForm.pincode} onChange={(e) => { setAddressForm((p) => ({ ...p, pincode: e.target.value })); if (formErrors.pincode) setFormErrors((p) => ({ ...p, pincode: "" })); }} placeholder="456771" />
-                  {formErrors.pincode && <p className="addr-form-error"><AlertCircle /> {formErrors.pincode}</p>}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Address Line 1 <span className="text-red-500">*</span></label>
+                <input className={`w-full border rounded-lg px-3 py-2.5 text-sm focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none ${formErrors.addressLine1 ? "border-red-400" : "border-gray-300"}`} value={addressForm.addressLine1} onChange={(e) => { setAddressForm((p) => ({ ...p, addressLine1: e.target.value })); if (formErrors.addressLine1) setFormErrors((p) => ({ ...p, addressLine1: "" })); }} placeholder="Street address, apartment, etc." />
+                {formErrors.addressLine1 && <p className="text-red-500 text-xs mt-1 flex items-center gap-1"><AlertCircle className="h-3 w-3" /> {formErrors.addressLine1}</p>}
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Address Line 2</label>
+                <input className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none" value={addressForm.addressLine2} onChange={(e) => setAddressForm((p) => ({ ...p, addressLine2: e.target.value }))} placeholder="Flat, building, floor (optional)" />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">City <span className="text-red-500">*</span></label>
+                  <input className={`w-full border rounded-lg px-3 py-2.5 text-sm focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none ${formErrors.city ? "border-red-400" : "border-gray-300"}`} value={addressForm.city} onChange={(e) => { setAddressForm((p) => ({ ...p, city: e.target.value })); if (formErrors.city) setFormErrors((p) => ({ ...p, city: "" })); }} />
+                  {formErrors.city && <p className="text-red-500 text-xs mt-1 flex items-center gap-1"><AlertCircle className="h-3 w-3" /> {formErrors.city}</p>}
                 </div>
-                <div className="addr-form-group">
-                  <label>Landmark</label>
-                  <input className="addr-form-input" value={addressForm.landmark} onChange={(e) => setAddressForm((p) => ({ ...p, landmark: e.target.value }))} placeholder="Near temple, hospital (optional)" />
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">State <span className="text-red-500">*</span></label>
+                  <input className={`w-full border rounded-lg px-3 py-2.5 text-sm focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none ${formErrors.state ? "border-red-400" : "border-gray-300"}`} value={addressForm.state} onChange={(e) => { setAddressForm((p) => ({ ...p, state: e.target.value })); if (formErrors.state) setFormErrors((p) => ({ ...p, state: "" })); }} />
+                  {formErrors.state && <p className="text-red-500 text-xs mt-1 flex items-center gap-1"><AlertCircle className="h-3 w-3" /> {formErrors.state}</p>}
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Pincode <span className="text-red-500">*</span></label>
+                  <input className={`w-full border rounded-lg px-3 py-2.5 text-sm focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none ${formErrors.pincode ? "border-red-400" : "border-gray-300"}`} value={addressForm.pincode} onChange={(e) => { setAddressForm((p) => ({ ...p, pincode: e.target.value })); if (formErrors.pincode) setFormErrors((p) => ({ ...p, pincode: "" })); }} placeholder="456771" />
+                  {formErrors.pincode && <p className="text-red-500 text-xs mt-1 flex items-center gap-1"><AlertCircle className="h-3 w-3" /> {formErrors.pincode}</p>}
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Landmark</label>
+                  <input className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none" value={addressForm.landmark} onChange={(e) => setAddressForm((p) => ({ ...p, landmark: e.target.value }))} placeholder="Near temple, hospital (optional)" />
                 </div>
               </div>
             </div>
-            <div className="addr-dialog-footer">
-              <button className="checkout-btn-back" onClick={() => { setShowAddressDialog(false); setFormErrors({}); }}>Cancel</button>
-              <button className="checkout-btn-next" style={{ background: "#16a34a", color: "#fff", border: "none" }} onClick={handleSaveAddress} disabled={createAddress.isPending || updateAddress.isPending}>
+            <div className="flex justify-end gap-3 p-5 border-t border-gray-100">
+              <button className="px-4 py-2.5 border border-gray-300 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-50 transition" onClick={() => { setShowAddressDialog(false); setFormErrors({}); }}>Cancel</button>
+              <button className="px-4 py-2.5 bg-green-600 text-white rounded-lg text-sm font-medium hover:bg-green-700 transition disabled:opacity-50" onClick={handleSaveAddress} disabled={createAddress.isPending || updateAddress.isPending}>
                 {editingAddress ? "Update" : "Save"} Address
               </button>
             </div>
           </div>
         </div>
       )}
+      </div>
     </div>
   );
 }

@@ -59,8 +59,15 @@ export const getCustomers = async (req, res, next) => {
     const query = {
       tenantId: req.tenantId,
       isDeleted: false,
-      name: { $regex: search, $options: "i" },
     };
+
+    if (search) {
+      const escapedSearch = search.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+      query.$or = [
+        { name: { $regex: escapedSearch, $options: "i" } },
+        { phone: { $regex: escapedSearch, $options: "i" } },
+      ];
+    }
 
     const skip = (page - 1) * limit;
 

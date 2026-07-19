@@ -17,10 +17,8 @@ import { usePayments } from "@/hooks/useQueries";
 import { formatCurrency, formatDate } from "@/lib/utils";
 
 const statusBadge = {
-  completed: "text-emerald-700 bg-emerald-50 border-emerald-200",
-  pending: "text-amber-700 bg-amber-50 border-amber-200",
-  failed: "text-red-700 bg-red-50 border-red-200",
-  refunded: "text-blue-700 bg-blue-50 border-blue-200",
+  FULL: "text-emerald-700 bg-emerald-50 border-emerald-200",
+  PARTIAL: "text-amber-700 bg-amber-50 border-amber-200",
 };
 
 export default function Payments() {
@@ -77,13 +75,14 @@ export default function Payments() {
                       <TableHead className="font-semibold text-slate-600">Amount</TableHead>
                       <TableHead className="font-semibold text-slate-600">Method</TableHead>
                       <TableHead className="font-semibold text-slate-600">Status</TableHead>
+                      <TableHead className="font-semibold text-slate-600">Notes</TableHead>
                       <TableHead className="font-semibold text-slate-600 text-right pr-5">Date</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {payments.length === 0 ? (
                       <TableRow>
-                        <TableCell colSpan={6} className="text-center py-12 text-slate-500">
+                        <TableCell colSpan={7} className="text-center py-12 text-slate-500">
                           No payments found
                         </TableCell>
                       </TableRow>
@@ -91,18 +90,19 @@ export default function Payments() {
                       payments.map((payment) => (
                         <TableRow key={payment._id} className="border-slate-50 hover:bg-slate-50/50">
                           <TableCell className="font-medium text-slate-900 text-sm pl-5">
-                            {payment.invoice?.invoiceNumber || payment.invoice?._id?.slice(-6).toUpperCase() || "-"}
+                            {payment.invoiceId?.invoiceNo || payment.invoiceId?._id?.slice(-6).toUpperCase() || "-"}
                           </TableCell>
                           <TableCell className="text-slate-600 text-sm">
-                            {payment.customer?.name || payment.invoice?.customer?.name || "-"}
+                            {payment.customerId?.name || "-"}
                           </TableCell>
-                          <TableCell className="font-medium text-slate-900 text-sm">{formatCurrency(payment.amount)}</TableCell>
-                          <TableCell className="text-slate-600 text-sm capitalize">{payment.method || payment.paymentMethod || "-"}</TableCell>
+                          <TableCell className="font-medium text-slate-900 text-sm">{formatCurrency(payment.amountPaid)}</TableCell>
+                          <TableCell className="text-slate-600 text-sm capitalize">{payment.paymentMethod || "-"}</TableCell>
                           <TableCell>
-                            <Badge variant="outline" className={statusBadge[payment.status] || statusBadge.pending}>
-                              {payment.status?.charAt(0).toUpperCase() + payment.status?.slice(1)}
+                            <Badge variant="outline" className={statusBadge[payment.status] || "text-slate-700 bg-slate-50 border-slate-200"}>
+                              {payment.status}
                             </Badge>
                           </TableCell>
+                          <TableCell className="text-slate-500 text-sm max-w-[200px] truncate">{payment.notes || "-"}</TableCell>
                           <TableCell className="text-slate-500 text-sm text-right pr-5">{formatDate(payment.createdAt)}</TableCell>
                         </TableRow>
                       ))

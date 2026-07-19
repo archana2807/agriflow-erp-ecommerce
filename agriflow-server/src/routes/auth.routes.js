@@ -17,9 +17,10 @@ import {
   updateProfileSchema,
 } from "../validations/auth.validation.js";
 
+
 const router = express.Router();
 
-// PUBLIC
+
 router.post("/register", validate(registerSchema), registerUser);
 router.post("/login", validate(loginSchema), loginUser);
 router.post("/logout", logoutUser);

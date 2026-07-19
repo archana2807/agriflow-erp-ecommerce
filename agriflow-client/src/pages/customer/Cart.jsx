@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { Trash2, Minus, Plus, ShoppingBag, ArrowRight, ArrowLeft, ShoppingCart } from "lucide-react";
 import { toast } from "sonner";
 import { formatCurrency } from "@/lib/utils";
+import ProductImage from "@/components/common/ProductImage";
 import {
   useCart,
   useUpdateCart,
@@ -12,39 +13,41 @@ import {
 
 function CartSkeleton() {
   return (
-    <div className="shop-page">
-      <div className="page-hero page-hero-green">
-        <div className="page-hero-inner">
-          <div className="page-hero-content">
-            <ShoppingCart className="h-6 w-6" />
-            <div>
-              <div style={{ width: 140, height: 24, background: "rgba(255,255,255,0.3)", borderRadius: 6 }} />
-              <div style={{ width: 100, height: 14, background: "rgba(255,255,255,0.2)", borderRadius: 4, marginTop: 6 }} />
+    <div className="min-h-screen bg-gray-50">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        <div className="bg-green-600 text-white rounded-2xl p-6 mb-6">
+          <div className="flex justify-between items-center">
+            <div className="flex items-center gap-3">
+              <ShoppingCart className="h-6 w-6" />
+              <div>
+                <div className="h-6 w-36 bg-white/30 rounded-md" />
+                <div className="h-3.5 w-24 bg-white/20 rounded mt-1.5" />
+              </div>
             </div>
           </div>
         </div>
-      </div>
-      <div className="cart-layout">
-        <div className="cart-items-card">
-          {Array.from({ length: 3 }).map((_, i) => (
-            <div key={i} className="cart-item">
-              <div style={{ width: 80, height: 80, borderRadius: 10, background: "#f0f0f0" }} />
-              <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: 8 }}>
-                <div style={{ width: "60%", height: 14, background: "#f0f0f0", borderRadius: 4 }} />
-                <div style={{ width: "40%", height: 12, background: "#f0f0f0", borderRadius: 4 }} />
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="bg-white rounded-xl border p-4 lg:col-span-2">
+            {Array.from({ length: 3 }).map((_, i) => (
+              <div key={i} className="flex items-center gap-4 py-4 border-b border-gray-100 last:border-0">
+                <div className="w-20 h-20 rounded-lg bg-gray-100" />
+                <div className="flex-1 flex flex-col gap-2">
+                  <div className="h-3.5 w-3/5 bg-gray-100 rounded" />
+                  <div className="h-3 w-2/5 bg-gray-100 rounded" />
+                </div>
+                <div className="w-24 h-8 bg-gray-100 rounded-lg" />
               </div>
-              <div style={{ width: 100, height: 32, background: "#f0f0f0", borderRadius: 8 }} />
-            </div>
-          ))}
-        </div>
-        <div className="cart-summary">
-          <div style={{ width: "60%", height: 18, background: "#f0f0f0", borderRadius: 4, marginBottom: 20 }} />
-          {Array.from({ length: 4 }).map((_, i) => (
-            <div key={i} style={{ display: "flex", justifyContent: "space-between", marginBottom: 12 }}>
-              <div style={{ width: "40%", height: 12, background: "#f0f0f0", borderRadius: 4 }} />
-              <div style={{ width: "25%", height: 12, background: "#f0f0f0", borderRadius: 4 }} />
-            </div>
-          ))}
+            ))}
+          </div>
+          <div className="bg-white rounded-xl border p-4">
+            <div className="h-4.5 w-3/5 bg-gray-100 rounded mb-5" />
+            {Array.from({ length: 4 }).map((_, i) => (
+              <div key={i} className="flex justify-between py-2 text-sm">
+                <div className="h-3 w-2/5 bg-gray-100 rounded" />
+                <div className="h-3 w-1/4 bg-gray-100 rounded" />
+              </div>
+            ))}
+          </div>
         </div>
       </div>
     </div>
@@ -94,48 +97,57 @@ export default function Cart() {
   if (loading) return <CartSkeleton />;
 
   return (
-    <div className="shop-page">
+    <div className="min-h-screen bg-gray-50">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
       {/* Hero Banner */}
-      <div className="page-hero page-hero-green">
-        <div className="page-hero-inner">
-          <div className="page-hero-content">
+      <div className="bg-green-600 text-white rounded-2xl p-6 mb-6 shadow-lg shadow-green-600/20">
+        <div className="flex justify-between items-center">
+          <div className="flex items-center gap-3">
             <ShoppingCart className="h-6 w-6" />
             <div>
-              <h1>Shopping Cart</h1>
-              <p>{loading ? "Loading..." : `${items.length} item${items.length !== 1 ? "s" : ""} in your cart`}</p>
+              <h1 className="text-xl font-bold">Shopping Cart</h1>
+              <p className="text-sm text-green-100">{loading ? "Loading..." : `${items.length} item${items.length !== 1 ? "s" : ""} in your cart`}</p>
             </div>
           </div>
-          <Link to="/shop" className="page-hero-btn">
-            Continue Shopping <ArrowRight className="h-4 w-4" />
+          <Link
+            to="/shop"
+            className="hidden sm:inline-flex items-center gap-2 px-4 py-2 bg-white text-green-600 rounded-lg font-medium hover:bg-green-50 transition-colors"
+          >
+            Continue Shopping
+            <ArrowRight className="h-4 w-4" />
           </Link>
         </div>
       </div>
 
       {/* Empty State */}
       {!loading && items.length === 0 ? (
-        <div className="empty-state mt-6">
-          <div className="empty-state-icon">
-            <ShoppingBag className="h-12 w-12" />
+        <div className="text-center py-16 px-4">
+          <div className="inline-flex items-center justify-center w-16 h-16 bg-gray-100 rounded-full mb-4 ring-4 ring-gray-100">
+            <ShoppingBag className="h-8 w-8 text-gray-400" />
           </div>
-          <h3>Your cart is empty</h3>
-          <p>Looks like you haven't added anything to your cart yet.</p>
-          <Link to="/shop" className="empty-state-btn">
-            <ShoppingBag className="h-4 w-4" /> Browse Products
+          <h3 className="text-lg font-semibold text-gray-900 mb-2">Your cart is empty</h3>
+          <p className="text-gray-500 mb-6">Looks like you haven't added anything to your cart yet.</p>
+          <Link
+            to="/shop"
+            className="inline-flex items-center gap-2 px-6 py-3 bg-green-600 text-white rounded-xl font-semibold hover:bg-green-700 transition-colors"
+          >
+            <ShoppingBag className="h-4 w-4" />
+            Browse Products
           </Link>
         </div>
       ) : (
         /* Cart Layout */
-        <div className="cart-layout">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Cart Items */}
-          <div className="cart-items-card">
-            <div className="cart-items-header">
-              <h3>Cart Items ({items.length})</h3>
+          <div className="bg-white rounded-xl border p-4 lg:col-span-2 shadow-sm hover:shadow-md transition-shadow">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold text-gray-900">Cart Items ({items.length})</h3>
               <button
-                className="cart-clear-btn"
                 onClick={handleClearCart}
                 disabled={clearCart.isPending}
+                className="flex items-center gap-2 text-sm text-red-500 hover:text-red-600 transition-colors"
               >
-                <Trash2 />
+                <Trash2 className="h-4 w-4" />
                 {clearCart.isPending ? "Clearing..." : "Clear Cart"}
               </button>
             </div>
@@ -144,114 +156,132 @@ export default function Cart() {
               const product = item.productId || {};
               const isUpdating = updateCart.isPending;
               return (
-                <div key={item.productId?._id} className="cart-item">
-                  <Link to={`/shop/${product.slug}`}>
-                    <img
-                      src={product.images?.[0] || "/placeholder.png"}
-                      alt={product.name}
-                      className="cart-item-img"
-                    />
-                  </Link>
-                  <div className="cart-item-info">
-                    {product.brandId?.name && (
-                      <p className="cart-item-brand">{product.brandId.name}</p>
-                    )}
-                    <h4 className="cart-item-name">
-                      <Link to={`/shop/${product.slug}`}>{product.name}</Link>
-                    </h4>
-                    <p className="cart-item-unit">{formatCurrency(item.price)} per unit</p>
-                  </div>
-                  <div className="cart-item-qty">
-                    <button
-                      className="cart-qty-btn"
-                      onClick={() => handleUpdateQty(product._id, item.quantity - 1)}
-                      disabled={item.quantity <= 1 || isUpdating}
-                    >
-                      <Minus />
-                    </button>
-                    <span className="cart-qty-value">
-                      {isUpdating ? "..." : item.quantity}
-                    </span>
-                    <button
-                      className="cart-qty-btn"
-                      onClick={() => handleUpdateQty(product._id, item.quantity + 1)}
-                      disabled={isUpdating}
-                    >
-                      <Plus />
-                    </button>
-                  </div>
-                  <div className="cart-item-right">
-                    <div className="cart-item-price">
-                      <span className="total">{formatCurrency(item.price * item.quantity)}</span>
+                <div key={item.productId?._id} className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 py-4 border-b border-gray-100 last:border-0">
+                  <div className="flex items-center gap-3 flex-1 min-w-0">
+                    <Link to={`/shop/${product.slug}`}>
+                      <ProductImage
+                        src={product.images?.[0]}
+                        alt={product.name}
+                        className="w-16 h-16 sm:w-20 sm:h-20 rounded-lg object-cover border shrink-0"
+                      />
+                    </Link>
+                    <div className="flex-1 min-w-0">
+                      {product.brandId?.name && (
+                        <p className="text-xs text-gray-500">{product.brandId.name}</p>
+                      )}
+                      <h4 className="font-medium text-gray-900 truncate text-sm sm:text-base">
+                        <Link to={`/shop/${product.slug}`} className="hover:text-green-600 transition-colors">
+                          {product.name}
+                        </Link>
+                      </h4>
+                      <p className="text-xs sm:text-sm text-gray-500">{formatCurrency(item.price)} per unit</p>
                     </div>
-                    <button
-                      className="cart-remove-btn"
-                      onClick={() => handleRemove(product._id)}
-                      disabled={removeFromCart.isPending}
-                      title="Remove item"
-                    >
-                      <Trash2 />
-                    </button>
+                  </div>
+                  <div className="flex items-center justify-between sm:justify-end gap-3 sm:gap-4">
+                    <div className="flex items-center border rounded-lg shadow-sm">
+                      <button
+                        className="p-1.5 hover:bg-gray-100 rounded-l-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                        onClick={() => handleUpdateQty(product._id, item.quantity - 1)}
+                        disabled={item.quantity <= 1 || isUpdating}
+                      >
+                        <Minus className="h-4 w-4 text-gray-600" />
+                      </button>
+                      <span className="px-3 py-1 text-sm font-medium text-gray-900">
+                        {isUpdating ? "..." : item.quantity}
+                      </span>
+                      <button
+                        className="p-1.5 hover:bg-gray-100 rounded-r-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                        onClick={() => handleUpdateQty(product._id, item.quantity + 1)}
+                        disabled={isUpdating}
+                      >
+                        <Plus className="h-4 w-4 text-gray-600" />
+                      </button>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <span className="text-sm font-semibold text-gray-900">
+                        {formatCurrency(item.price * item.quantity)}
+                      </span>
+                      <button
+                        onClick={() => handleRemove(product._id)}
+                        disabled={removeFromCart.isPending}
+                        title="Remove item"
+                        className="p-1.5 text-gray-400 hover:text-red-500 transition-colors"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </button>
+                    </div>
                   </div>
                 </div>
               );
             })}
 
-            <Link to="/shop" className="cart-continue-link">
-              <ArrowLeft /> Continue Shopping
+            <Link
+              to="/shop"
+              className="flex items-center gap-2 text-sm text-green-600 hover:text-green-700 mt-4 transition-colors"
+            >
+              <ArrowLeft className="h-4 w-4" />
+              Continue Shopping
             </Link>
           </div>
 
           {/* Order Summary */}
-          <div className="cart-summary">
-            <h3>Order Summary</h3>
+          <div className="bg-white rounded-xl border p-6 h-fit lg:sticky lg:top-4 shadow-lg">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">Order Summary</h3>
 
-            <div className="cart-coupon">
+            <div className="flex gap-2 mb-4">
               <input
                 type="text"
                 placeholder="Coupon code"
                 value={couponCode}
                 onChange={(e) => setCouponCode(e.target.value)}
+                className="flex-1 px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
               />
-              <button>Apply</button>
+              <button className="px-4 py-2 border rounded-lg text-sm font-medium hover:bg-gray-50 transition-colors">
+                Apply
+              </button>
             </div>
 
-            <div className="cart-summary-row">
-              <span className="label">Subtotal</span>
-              <span className="value">{formatCurrency(subtotal)}</span>
+            <div className="flex justify-between py-2 text-sm">
+              <span className="text-gray-600">Subtotal</span>
+              <span className="font-medium text-gray-900">{formatCurrency(subtotal)}</span>
             </div>
-            <div className="cart-summary-row">
-              <span className="label">GST (18%)</span>
-              <span className="value">{formatCurrency(gst)}</span>
+            <div className="flex justify-between py-2 text-sm">
+              <span className="text-gray-600">GST (18%)</span>
+              <span className="font-medium text-gray-900">{formatCurrency(gst)}</span>
             </div>
             {discount > 0 && (
-              <div className="cart-summary-row discount">
-                <span className="label">Discount</span>
-                <span className="value">-{formatCurrency(discount)}</span>
+              <div className="flex justify-between py-2 text-sm">
+                <span className="text-gray-600">Discount</span>
+                <span className="font-medium text-green-600">-{formatCurrency(discount)}</span>
               </div>
             )}
 
-            <div className="cart-summary-divider" />
+            <div className="border-t border-gray-200 my-4" />
 
-            <div className="cart-summary-total">
-              <span className="label">Grand Total</span>
-              <span className="value">{formatCurrency(grandTotal)}</span>
+            <div className="flex justify-between py-2 text-base font-semibold">
+              <span className="text-gray-900">Grand Total</span>
+              <span className="text-gray-900">{formatCurrency(grandTotal)}</span>
             </div>
 
             <button
-              className="cart-checkout-btn"
               onClick={() => navigate("/checkout")}
+              className="w-full py-3 bg-green-600 text-white rounded-xl font-semibold hover:bg-green-700 shadow-lg shadow-green-600/30 hover:shadow-xl hover:shadow-green-600/40 transition-all flex items-center justify-center gap-2 mt-4"
             >
               Proceed to Checkout
-              <ArrowRight />
+              <ArrowRight className="h-4 w-4" />
             </button>
 
-            <Link to="/shop" className="cart-continue-link justify-center mt-3">
-              <ArrowLeft /> Continue Shopping
+            <Link
+              to="/shop"
+              className="flex items-center justify-center gap-2 text-sm text-green-600 hover:text-green-700 mt-3 transition-colors"
+            >
+              <ArrowLeft className="h-4 w-4" />
+              Continue Shopping
             </Link>
           </div>
         </div>
       )}
+      </div>
     </div>
   );
 }

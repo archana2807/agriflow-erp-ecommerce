@@ -7,11 +7,10 @@ export const uploadService = {
       body: formData,
       credentials: "include",
     });
-    if (!res.ok) {
-      const err = new Error("Upload failed");
-      err.status = res.status;
-      throw err;
+    const data = await res.json();
+    if (!res.ok || !data.success) {
+      throw new Error(data.message || `Upload failed (${res.status})`);
     }
-    return res.json();
+    return { url: data.url, filename: data.filename };
   },
 };
